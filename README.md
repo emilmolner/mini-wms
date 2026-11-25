@@ -45,4 +45,4 @@ docker exec wms-php php bin/phpunit --testdox
 | `app/src/Controller/` | rutele API (gata făcute) |
 | `app/src/Warehouse/WarehouseMap.php` | harta depozitului |
 | `api.http` | cereri gata făcute (extensia REST Client din VS Code) |
-| `docs/` | ghidul cursului și fișa tutorelui |
+| `docs/` | ghidul cursului (Markdown și PDF) |

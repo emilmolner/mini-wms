@@ -1,2 +1,5 @@
 .DS_Store
 .idea/
+
+# Fisa tutorelui (contine solutiile): ramane doar pe calculatorul tutorelui
+docs/FISA-TUTORE.*
