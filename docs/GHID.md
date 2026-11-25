@@ -1,6 +1,6 @@
 # Mini-WMS: algoritmi pe un depozit adevărat
 
-**Ghidul cursului** · 14 ore, în 3 întâlniri (6 h + 6 h + 2 h)
+**Ghidul cursului** · 14 ore, în 3 întâlniri (6 h + 6 h + 2 h) · Tutore: **Emil Molner**
 
 ---
 
@@ -97,7 +97,7 @@ git --version
 **Pasul 1. Descarcă proiectul** într-un folder fără spații și fără diacritice în cale (de exemplu `C:\proiecte` sau `~/proiecte`):
 
 ```bash
-git clone https://github.com/NUME-TUTORE/mini-wms.git
+git clone https://github.com/emilmolner/mini-wms.git
 cd mini-wms
 ```
 

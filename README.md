@@ -1,6 +1,6 @@
 # Mini-WMS: algoritmi pe un depozit adevărat
 
-Mini-curs practic de 14 ore: construim API-ul unui depozit de materiale de construcții și rezolvăm cu algoritmi probleme reale: găsirea unui produs, coada de comenzi, împachetarea în cutii, încărcarea camionului, drumul prin depozit.
+Mini-curs practic de 14 ore, cu tutorele Emil Molner: construim API-ul unui depozit de materiale de construcții și rezolvăm cu algoritmi probleme reale: găsirea unui produs, coada de comenzi, împachetarea în cutii, încărcarea camionului, drumul prin depozit.
 
 📘 **Ghidul complet, cu toți pașii și exercițiile:** [`docs/GHID.md`](docs/GHID.md) (sau [`docs/GHID.pdf`](docs/GHID.pdf))
 
@@ -9,7 +9,7 @@ Mini-curs practic de 14 ore: construim API-ul unui depozit de materiale de const
 Ai nevoie de **Docker Desktop**, **Git** și **VS Code**.
 
 ```bash
-git clone https://github.com/NUME-TUTORE/mini-wms.git
+git clone https://github.com/emilmolner/mini-wms.git
 cd mini-wms
 docker compose up -d --build
 docker exec wms-php composer install
