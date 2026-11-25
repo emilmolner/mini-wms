@@ -16,12 +16,14 @@ class ProductRepository extends ServiceEntityRepository
 
     /**
      * Toate codurile de produs, sortate crescator (sortarea o face MySQL).
+     * COLLATE utf8mb4_bin = MySQL compara textele octet cu octet, exact ca PHP;
+     * altfel ordinea lui MySQL ar putea diferi de cea pe care o presupune cautarea binara.
      *
      * @return list<string>
      */
     public function allCodesSorted(): array
     {
         return $this->getEntityManager()->getConnection()
-            ->fetchFirstColumn('SELECT code FROM product ORDER BY code');
+            ->fetchFirstColumn('SELECT code FROM product ORDER BY code COLLATE utf8mb4_bin');
     }
 }

@@ -115,6 +115,11 @@
 
 <script>
 // ---------- utilitare ----------
+// Transforma un text in HTML sigur: "<b>" se afiseaza ca text, nu devine HTML.
+function esc(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+
 async function api(path, params) {
   const url = '/api' + path + '?' + new URLSearchParams(params);
   const response = await fetch(url);
@@ -124,7 +129,7 @@ async function api(path, params) {
 }
 
 function stat(title, value, note = '') {
-  return `<div class="stat"><small>${title}</small><b>${value}</b><small>${note}</small></div>`;
+  return `<div class="stat"><small>${esc(title)}</small><b>${esc(value)}</b><small>${esc(note)}</small></div>`;
 }
 
 // Deseneaza harta primita de la API (lista de randuri text) ca un grid colorat.
@@ -152,7 +157,7 @@ const handlers = {
 
   async coada(form) {
     const d = await api('/comenzi/coada', { limita: form.limita.value });
-    const rows = d.coada.map((c, i) => `<tr><td>${i + 1}</td><td>${c.numar}</td><td>${c.client}</td><td>${c.prioritate}</td><td>${c.dataCreare}</td></tr>`);
+    const rows = d.coada.map((c, i) => `<tr><td>${i + 1}</td><td>${esc(c.numar)}</td><td>${esc(c.client)}</td><td>${c.prioritate}</td><td>${esc(c.dataCreare)}</td></tr>`);
     return `<div class="cards">${stat('Comenzi sortate', d.totalComenzi, d.timpMs + ' ms')}</div>
       <table><tr><th>#</th><th>Numar</th><th>Client</th><th>Prioritate</th><th>Data</th></tr>${rows.join('')}</table>`;
   },
@@ -184,7 +189,7 @@ const handlers = {
       ${stat('Diferenta', lei(d.toateCombinatiile.valoare - d.metodaLacoma.valoare))}
     </div>
     <table><tr><th>Comanda</th><th>Greutate</th><th>Valoare</th><th>Lacoma</th><th>Toate combinatiile</th></tr>
-      ${d.comenziDinCoada.map(c => `<tr><td>${c.nume}</td><td>${c.greutate} kg</td><td>${lei(c.valoare)}</td>
+      ${d.comenziDinCoada.map(c => `<tr><td>${esc(c.nume)}</td><td>${c.greutate} kg</td><td>${lei(c.valoare)}</td>
         <td>${d.metodaLacoma.alese.includes(c.nume) ? '✔' : ''}</td><td>${d.toateCombinatiile.alese.includes(c.nume) ? '✔' : ''}</td></tr>`).join('')}
     </table>`;
   },
@@ -199,7 +204,7 @@ document.querySelectorAll('form[data-action]').forEach(form => {
     try {
       out.innerHTML = await handlers[form.dataset.action](form);
     } catch (error) {
-      out.innerHTML = `<p class="error">${error.message}</p>`;
+      out.innerHTML = `<p class="error">${esc(error.message)}</p>`;
     }
   });
 });

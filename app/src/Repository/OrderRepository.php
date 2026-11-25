@@ -26,6 +26,8 @@ class OrderRepository extends ServiceEntityRepository
     }
 
     /**
+     * In engleza: "N+1 Query Problem", rezolvata cu Eager Loading (JOIN + addSelect / "fetch join").
+     *
      * EXERCITIUL 4b: aceleasi comenzi, dar cu liniile si produsele aduse din ACELASI query (JOIN).
      *
      * @return list<Order>

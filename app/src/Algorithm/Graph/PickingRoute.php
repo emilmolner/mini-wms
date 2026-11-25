@@ -5,6 +5,10 @@ namespace App\Algorithm\Graph;
 /**
  * EXERCITIUL 8: in ce ordine luam produsele unei comenzi de pe rafturi?
  *
+ * In engleza: Travelling Salesman Problem (TSP), problema comis-voiajorului.
+ *   "cel mai apropiat vecin" = Nearest Neighbor Heuristic (Greedy), O(n^2)
+ *   "toate variantele"       = Brute Force cu Permutations / Backtracking, O(n!)
+ *
  * Plecam de la rampa (START), trecem pe la toate locatiile comenzii si ne intoarcem la rampa.
  * Primim tabelul distantelor: $dist[$i][$j] = cati pasi sunt de la locatia $i la locatia $j.
  * Locatia 0 este START. O ruta arata asa: [0, 2, 1, 3, 0].
@@ -45,7 +49,7 @@ final class PickingRoute
         //
         //  $route[] = 0;        // ne intoarcem la START
         //  return $route;
-        return array_merge([0], range(1, $n - 1), [0]);
+        return [...range(0, $n - 1), 0];
     }
 
     /**

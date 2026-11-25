@@ -7,6 +7,9 @@ use App\Warehouse\WarehouseMap;
 /**
  * EXERCITIUL 7: drumul cel mai scurt prin depozit.
  *
+ * In engleza: Shortest Path in a Grid / Graph, cu Breadth-First Search (BFS). Structura: Queue (FIFO).
+ * Complexitate: O(V + E) - V = noduri (celule), E = muchii (legaturi intre celule vecine).
+ *
  * Arunci o piatra in apa: valurile pornesc din acel punct si se departeaza in cercuri.
  * Primul val atinge locurile aflate la 1 pas, al doilea val pe cele aflate la 2 pasi, si tot asa.
  * Primul val care atinge destinatia ne spune drumul cel mai scurt.

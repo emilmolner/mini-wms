@@ -5,6 +5,9 @@ namespace App\Algorithm\Sort;
 /**
  * EXERCITIUL 3: in ce ordine pregatim comenzile?
  *
+ * In engleza: Sorting cu un Comparator (Custom Comparison Function), "multi-key sort".
+ * usort() din PHP foloseste intern o sortare hibrida (Hybrid Sort, din familia Quick Sort / Insertion Sort): O(n log n).
+ *
  * Ca la camera de garda: intai urgentele, iar intre doi pacienti la fel de urgenti,
  * intra cel care a venit primul. Regula din depozit:
  *   1. prioritatea mai mica e mai importanta: 1 (urgent), apoi 2 (normal), apoi 3 (poate astepta);

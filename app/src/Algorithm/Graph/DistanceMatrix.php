@@ -4,7 +4,10 @@ namespace App\Algorithm\Graph;
 
 use App\Warehouse\WarehouseMap;
 
-/** Calculeaza distantele (in pasi) intre oricare doua locatii, folosind PathFinder (BFS). Complet. */
+/**
+ * GATA FACUT: calculeaza distantele (in pasi) intre oricare doua locatii, folosind PathFinder (BFS).
+ * In engleza: Distance Matrix (All-Pairs Shortest Paths).
+ */
 final class DistanceMatrix
 {
     public function __construct(private readonly PathFinder $pathFinder)

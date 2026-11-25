@@ -24,7 +24,7 @@
   - [Exercițiul 7: Drumul cel mai scurt](#exercițiul-7-drumul-cel-mai-scurt)
   - [Exercițiul 8: Ruta de colectare](#exercițiul-8-ruta-de-colectare)
 - [Întâlnirea 3: Interfața web și prezentarea](#întâlnirea-3)
-- [Anexe: probleme frecvente, comenzi, cuvinte noi](#anexe)
+- [Anexe: probleme frecvente, comenzi, cuvinte noi, dicționar român–englez](#anexe)
 
 ---
 
@@ -244,7 +244,7 @@ Fiecare exercițiu se face la fel:
    docker exec wms-php php bin/phpunit --testdox --filter Ex1
    ```
 
-   La început testele sunt roșii (✘). Exercițiul e gata când toate sunt verzi (✔).
+   La început majoritatea testelor sunt roșii (✘). Câteva pot fi verzi din start, pentru că verifică un caz simplu (de exemplu „cod inexistent → -1”). Exercițiul e gata când **toate** sunt verzi (✔).
 5. **Încerci în browser**, în http://localhost:8000/api/doc, ruta exercițiului.
 6. **Salvezi în Git:**
 
@@ -279,6 +279,8 @@ Citim „O(n)” ca „de ordinul lui n”. Nu e nevoie de mai mult de atât pen
 ---
 
 ## Exercițiul 1: Căutarea binară
+
+> 🇬🇧 **În engleză:** Binary Search · familia *Searching* · O(log n)
 
 **Problema.** Un client sună: „Aveți produsul `PROD-0791900`?”. Avem 200.000 de coduri. Cum îl găsim repede?
 
@@ -324,6 +326,8 @@ A doua comandă caută un cod care nu există în liste tot mai mari și afișea
 
 ## Exercițiul 2: Dulapul cu sertare
 
+> 🇬🇧 **În engleză:** Hash Table / Hash Map · *lookup* în O(1)
+
 **Problema.** Un client trimite o listă cu 200 de coduri. Vrem să-i spunem care dintre ele **nu există** în catalog.
 
 **Varianta simplă (gata făcută).** Pentru fiecare cod cerut, căutăm pe rând în tot catalogul: 200 × 200.000 = până la **40 de milioane** de comparații.
@@ -368,6 +372,8 @@ Apoi `GET /api/catalog/verificare-aleatoare?numar=200`:
 
 ## Exercițiul 3: Coada de comenzi
 
+> 🇬🇧 **În engleză:** Sorting cu un Comparator · *custom sort* / *multi-key sort*
+
 **Problema.** Avem 3.000 de comenzi. În ce ordine le pregătim?
 
 **Ideea: ca la camera de gardă.** Intră întâi urgențele. Între doi pacienți la fel de urgenți, intră cel venit primul. Regula din depozit:
@@ -403,6 +409,8 @@ Apoi `GET /api/comenzi/coada`: primele comenzi trebuie să aibă `"prioritate": 
 ---
 
 ## Exercițiul 4: Baza de date
+
+> 🇬🇧 **În engleză:** Database Index (B-Tree) și N+1 Query Problem
 
 Algoritmii nu trăiesc doar în codul PHP. Și baza de date folosește aceleași idei.
 
@@ -490,6 +498,8 @@ Azi comparăm de trei ori o metodă lacomă cu una care încearcă tot.
 
 ## Exercițiul 5: Împachetarea în cutii
 
+> 🇬🇧 **În engleză:** Bin Packing Problem · Greedy: Next Fit, First Fit, First Fit Decreasing
+
 **Problema.** Comanda `CMD-00587` are 11 bucăți: `[12, 12, 18, 18, 4, 13, 23, 23, 17, 17, 17]` kg. O cutie duce cel mult **30 kg**. Vrem cât mai **puține** cutii.
 
 **Trei reguli simple (toate „lacome”):**
@@ -517,6 +527,8 @@ Apoi `GET /api/comenzi/CMD-00587/impachetare`. Încearcă și cu `capacitate=40`
 ---
 
 ## Exercițiul 6: Încărcarea camionului
+
+> 🇬🇧 **În engleză:** 0/1 Knapsack Problem · Greedy vs. Brute Force (Exhaustive Search)
 
 **Problema.** Camionul duce **50 kg**. Avem trei comenzi:
 
@@ -562,6 +574,8 @@ Apoi:
 ---
 
 ## Exercițiul 7: Drumul cel mai scurt
+
+> 🇬🇧 **În engleză:** Shortest Path · Breadth-First Search (BFS) · Queue
 
 **Problema.** Omul care strânge produsele pleacă de la rampă (`S`) și trebuie să ajungă la raftul `W08`. Pe unde merge ca să facă **cei mai puțini pași**? Atenție la paletul `P` de pe culoar.
 
@@ -617,6 +631,8 @@ Pasi: 28   Celule verificate: 118
 ---
 
 ## Exercițiul 8: Ruta de colectare
+
+> 🇬🇧 **În engleză:** Travelling Salesman Problem (TSP) · Nearest Neighbor Heuristic vs. Brute Force
 
 **Problema.** Comanda `CMD-00017` are produse pe 6 rafturi: `B02`, `H03`, `B07`, `T04`, `W08`, `T07`. Omul pleacă de la rampă, trece pe la toate și se întoarce. În ce **ordine** merge ca să facă cei mai puțini pași?
 
@@ -709,6 +725,8 @@ Ultima comandă îți arată, fișier cu fișier, diferența dintre ce aveai de 
 | Am stricat ceva într-un fișier | `git checkout -- app/src/Algorithm/Search/BinarySearch.php` îl aduce înapoi la ultima versiune salvată. |
 | Vreau să o iau de la capăt cu datele | `docker exec wms-php php bin/console app:date:genereaza` |
 | Vreau să șterg tot (containere și date) | `docker compose down -v`, apoi pașii din 0.2 |
+| **Linux:** VS Code spune *Permission denied* când salvez un fișier creat de o comandă (de exemplu migrarea) | Fișierele create în container aparțin utilizatorului `root`. Rulează o dată `sudo chown -R $USER app`. |
+| **Windows:** totul merge foarte încet | Docker Desktop e mult mai rapid dacă proiectul stă în WSL. Deschide terminalul *Ubuntu (WSL)*, clonează proiectul acolo (de exemplu în `~/proiecte`) și deschide-l din VS Code cu extensia *WSL*. |
 
 ## B. Comenzi utile
 
@@ -759,3 +777,70 @@ EXPLAIN ANALYZE SELECT * FROM product WHERE code = 'PROD-0791900';
 | **Recursivitate** | o funcție care se apelează pe ea însăși, pe o problemă mai mică |
 | **Test automat** | cod care verifică alt cod: verde, merge; roșu, ceva e greșit |
 | **WMS** | *Warehouse Management System*, programul care administrează un depozit |
+
+## D. Dicționar român – englez
+
+La curs, în cărți, pe Stack Overflow sau când întrebi un asistent AI, algoritmii apar aproape mereu cu numele în engleză. Tabelul te ajută să faci legătura.
+
+### Familii de algoritmi și metode
+
+| În ghid | În engleză | Ce înseamnă pe scurt | Unde apare |
+|---|---|---|---|
+| Căutare | **Searching** | găsești un element într-o colecție | Ex. 1, 2 |
+| Sortare | **Sorting** | pui elementele într-o ordine | Ex. 3 |
+| Filtrare | **Filtering** | păstrezi doar elementele care respectă o condiție (`array_filter`, `WHERE` în SQL) | Ex. 2 (codurile lipsă) |
+| Împarte și stăpânește | **Divide and Conquer** | împarți problema în bucăți mai mici | Ex. 1 |
+| Metoda lacomă | **Greedy Algorithm** | alegi la fiecare pas ce pare mai bun acum | Ex. 5, 6, 8 |
+| Toate variantele / combinațiile | **Brute Force**, **Exhaustive Search** | încerci tot și păstrezi ce e mai bun | Ex. 6, 8 |
+| Revenire (încearcă, apoi anulează) | **Backtracking** | construiești soluția pas cu pas, cu „undo” | Ex. 6, 8 |
+| Recursivitate | **Recursion** | o funcție care se apelează pe ea însăși | Ex. 6, 8 |
+| Euristică | **Heuristic** | regulă rapidă, bună în practică, fără garanția celui mai bun rezultat | Ex. 8 |
+| Programare dinamică | **Dynamic Programming (DP)** | reții rezultatele subproblemelor ca să nu le calculezi de două ori | la curs |
+| Optimizare combinatorie | **Combinatorial Optimization** | cauți cea mai bună combinație dintre foarte multe | Ex. 5, 6, 8 |
+
+### Algoritmi și probleme
+
+| În ghid | În engleză | Complexitate |
+|---|---|---|
+| Căutare pe rând (secvențială) | **Linear Search**, Sequential Search | O(n) |
+| Căutare binară | **Binary Search** | O(log n) |
+| Dulapul cu sertare (tabelă de dispersie) | **Hash Table**, Hash Map, Dictionary; în PHP *associative array* | O(1) în medie |
+| Două bucle una în alta | **Nested Loops** | O(n · m) |
+| Comparator | **Comparator**, Comparison Function | |
+| Sortarea din PHP (`usort`) | **Hybrid Sort** (Quick Sort + Insertion Sort) | O(n log n) |
+| Sortare prin interclasare (la curs) | **Merge Sort** | O(n log n) |
+| Sortare rapidă (la curs) | **Quick Sort** | O(n log n) în medie |
+| Index în baza de date | **Database Index**, B-Tree | O(log n) |
+| Citirea întregului tabel | **Full Table Scan** | O(n) |
+| Problema N+1 | **N+1 Query Problem**; soluția: **Eager Loading**, JOIN | |
+| Împachetarea în cutii | **Bin Packing Problem** | |
+| „Cutia curentă” | **Next Fit** | |
+| „Prima cutie în care încape” | **First Fit** | |
+| „Întâi cele grele” | **First Fit Decreasing (FFD)** | |
+| Încărcarea camionului (problema rucsacului) | **0/1 Knapsack Problem** | |
+| Drumul cel mai scurt | **Shortest Path** | |
+| Parcurgerea în lățime („valuri în apă”) | **Breadth-First Search (BFS)** | O(V + E) |
+| Parcurgerea în adâncime | **Depth-First Search (DFS)** | O(V + E) |
+| Drumul cel mai ieftin (la curs) | **Dijkstra's Algorithm** | |
+| Ruta de colectare (problema comis-voiajorului) | **Travelling Salesman Problem (TSP)** | |
+| Cel mai apropiat vecin | **Nearest Neighbor Heuristic** | O(n²) |
+| Toate ordinile posibile | **Permutations** | O(n!) |
+
+### Structuri de date și alți termeni
+
+| În ghid | În engleză |
+|---|---|
+| Listă / vector | **Array**, List |
+| Coadă (primul venit, primul servit) | **Queue**, FIFO (*First In, First Out*) |
+| Stivă (ultimul venit, primul servit) | **Stack**, LIFO (*Last In, First Out*) |
+| Coadă cu priorități | **Priority Queue**, Heap |
+| Graf, nod, muchie | **Graph**, Node / Vertex, Edge |
+| Hartă ca o matrice de celule | **Grid** |
+| Matricea distanțelor | **Distance Matrix** |
+| Complexitate, „de ordinul lui n” | **Time Complexity**, **Big O Notation** |
+| Cazul cel mai nefavorabil | **Worst Case** |
+| Cazul mediu | **Average Case** |
+| Soluția cea mai bună | **Optimal Solution** |
+| Test automat | **Unit Test** |
+| Interogare SQL | **Query** |
+

@@ -5,6 +5,11 @@ namespace App\Algorithm\Optimization;
 /**
  * EXERCITIUL 6: ce comenzi incarcam azi in camion?
  *
+ * In engleza: 0/1 Knapsack Problem (problema rucsacului).
+ *   "metoda lacoma"      = Greedy Algorithm (dupa raportul valoare / greutate)
+ *   "toate combinatiile" = Brute Force / Exhaustive Search, scrisa cu Recursion (Backtracking), O(2^n)
+ * La curs veti vedea si Dynamic Programming (programarea dinamica), exacta si mult mai rapida.
+ *
  * Camionul duce cel mult $capacity kg. Fiecare comanda are o greutate (kg) si o valoare (lei).
  * O comanda se ia intreaga sau deloc. Vrem sa plece camionul cu marfa de valoare cat mai MARE.
  *

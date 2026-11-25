@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Un produs din catalog.
  * Atentie: coloana "code" NU are index la inceput. Il adaugam in Exercitiul 4a.
+ * In engleza: Database Index (in MySQL, un B-Tree); fara index, MySQL face "Full Table Scan".
  */
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 // TODO EXERCITIUL 4a: aici adaugi linia  #[ORM\Index(name: 'idx_product_code', columns: ['code'])]

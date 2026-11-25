@@ -11,7 +11,8 @@ services:
     build: ./docker/php
     container_name: wms-php
     ports:
-      - "8000:8000"
+      # 127.0.0.1 = accesibil doar de pe calculatorul tau, nu si din reteaua Wi-Fi
+      - "127.0.0.1:8000:8000"
     environment:
       DATABASE_URL: "mysql://wms:wms@wms-mysql:3306/wms?serverVersion=8.4&charset=utf8mb4"
     volumes:
@@ -30,7 +31,7 @@ services:
       MYSQL_PASSWORD: wms
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "3307:3306"
+      - "127.0.0.1:3307:3306"
     volumes:
       - wms_mysql_data:/var/lib/mysql
     healthcheck:

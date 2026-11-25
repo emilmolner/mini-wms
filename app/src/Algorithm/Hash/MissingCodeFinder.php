@@ -5,6 +5,9 @@ namespace App\Algorithm\Hash;
 /**
  * EXERCITIUL 2: un client trimite o lista de coduri. Care dintre ele NU exista in catalog?
  *
+ * In engleza: Hash Table / Hash Map (in PHP: associative array), "lookup" in O(1).
+ * Varianta naiva: Nested Loops, O(n * m). Varianta rapida: O(n + m).
+ *
  * Varianta "naiva": pentru fiecare cod cerut, ne uitam prin TOT catalogul. Ca si cum ai cauta
  * cheia potrivita incercand-o pe fiecare din legatura de chei. 200 de coduri x 200.000 de produse
  * inseamna zeci de milioane de comparatii.

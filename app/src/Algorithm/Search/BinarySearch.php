@@ -5,6 +5,8 @@ namespace App\Algorithm\Search;
 /**
  * EXERCITIUL 1: cautarea binara (cautarea "prin injumatatire").
  *
+ * In engleza: Binary Search. Familia: "Searching". Strategia: Divide and Conquer. Complexitate: O(log n).
+ *
  * Jocul "ghiceste numarul": ma gandesc la un numar intre 1 si 100, iar tu primesti doar raspunsul
  * "mai mare" sau "mai mic". Cel mai bine incepi cu 50: oricare ar fi raspunsul, scapi de jumatate
  * din numere. Apoi 25 sau 75, si tot asa. In cel mult 7 incercari ai ghicit.

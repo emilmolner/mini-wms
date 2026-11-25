@@ -5,6 +5,11 @@ namespace App\Algorithm\Packing;
 /**
  * EXERCITIUL 5: in cate cutii impachetam produsele unei comenzi?
  *
+ * In engleza: Bin Packing Problem. Metoda: Greedy Algorithm.
+ *   "cutia curenta"              = Next Fit
+ *   "prima cutie in care incape" = First Fit
+ *   "intai cele grele"           = First Fit Decreasing (FFD)
+ *
  * O cutie duce cel mult $capacity kg. Vrem cat mai PUTINE cutii.
  * Sa gasim mereu cea mai buna impachetare e foarte greu, asa ca folosim reguli simple,
  * numite "metode lacome": la fiecare pas facem alegerea care pare cea mai buna ACUM

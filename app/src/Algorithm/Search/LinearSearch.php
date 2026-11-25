@@ -5,6 +5,8 @@ namespace App\Algorithm\Search;
 /**
  * EXEMPLU GATA FACUT: cautarea "pe rand" (secventiala).
  *
+ * In engleza: Linear Search / Sequential Search. Complexitate: O(n).
+ *
  * Ca atunci cand cauti o carte pe un raft: te uiti la prima, apoi la a doua, apoi la a treia...
  * pana o gasesti. Daca raftul are 1.000.000 de carti, poti ajunge sa te uiti la toate.
  */
