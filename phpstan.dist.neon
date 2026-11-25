@@ -1,0 +1,33 @@
+# Configurarea PHPStan (verificarea statica a codului).
+# Editorul (Zed / PHPantom, VS Code) porneste PHPStan din folderul principal, mini-wms;
+# fisierul asta ii spune ca aplicatia si bibliotecile ei (vendor) sunt in folderul app.
+#
+# Rulare din terminal (din mini-wms):  phpstan analyse
+parameters:
+    level: 5
+    paths:
+        - app/src
+        - app/tests
+    excludePaths:
+        # generat de Symfony la crearea proiectului
+        - app/tests/bootstrap.php
+    bootstrapFiles:
+        - app/vendor/autoload.php
+    tmpDir: app/var/phpstan
+
+    # unele avertismente apar doar pe ramura main (cu TODO), altele doar pe solutii
+    reportUnmatchedIgnoredErrors: false
+
+    ignoreErrors:
+        # Entitatile: Doctrine completeaza singur campurile, din baza de date.
+        -
+            identifiers: [property.onlyRead, property.unusedType]
+            path: app/src/Entity/*
+        # Exercitiul 7 nerezolvat (ramura main): shortestPath() intoarce inca null.
+        -
+            identifiers: [return.unusedType, method.unused]
+            path: app/src/Algorithm/Graph/PathFinder.php
+        # Kernel.php e generat de Symfony; metoda e folosita de Symfony, nu de codul nostru.
+        -
+            identifier: method.unused
+            path: app/src/Kernel.php
