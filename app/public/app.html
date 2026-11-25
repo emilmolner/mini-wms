@@ -1,0 +1,216 @@
+<!doctype html>
+<!--
+  PAGINA OPTIONALA (sesiunea 3): o interfata minima pentru API-ul Mini-WMS.
+  Fara React, fara npm: doar HTML, CSS si JavaScript simplu care apeleaza API-ul cu fetch().
+  Se deschide la http://localhost:8000/app.html
+-->
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mini-WMS</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#1d2330; --muted:#6b7280; --accent:#2563eb; --ok:#16a34a; --bad:#dc2626;
+          --shelf:#94a3b8; --wall:#334155; --aisle:#f1f5f9; --path:#fbbf24; --target:#2563eb; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; background:var(--bg); color:var(--text); }
+  header { background:var(--wall); color:#fff; padding:14px 20px; }
+  header h1 { margin:0; font-size:20px; }
+  header p { margin:4px 0 0; color:#cbd5e1; font-size:14px; }
+  nav { display:flex; gap:6px; flex-wrap:wrap; padding:12px 20px 0; }
+  nav button { border:1px solid #d1d5db; background:#fff; padding:8px 14px; border-radius:8px; cursor:pointer; font-size:14px; }
+  nav button.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+  main { padding:16px 20px; max-width:1100px; }
+  section { display:none; background:var(--card); border-radius:12px; padding:18px; box-shadow:0 1px 3px rgba(0,0,0,.08); }
+  section.active { display:block; }
+  h2 { margin:0 0 6px; font-size:18px; }
+  .hint { color:var(--muted); font-size:14px; margin:0 0 14px; }
+  form { display:flex; gap:8px; flex-wrap:wrap; align-items:end; margin-bottom:14px; }
+  label { display:flex; flex-direction:column; font-size:13px; color:var(--muted); gap:4px; }
+  input, select { padding:8px 10px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; }
+  form button { padding:9px 16px; border:0; border-radius:8px; background:var(--accent); color:#fff; cursor:pointer; font-size:14px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:12px; }
+  .stat { border:1px solid #e5e7eb; border-radius:10px; padding:12px; }
+  .stat b { display:block; font-size:22px; margin-top:4px; }
+  .stat small { color:var(--muted); }
+  table { border-collapse:collapse; width:100%; font-size:14px; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid #e5e7eb; }
+  .grid { display:inline-grid; gap:1px; background:#e2e8f0; padding:1px; border-radius:6px; margin-top:8px; }
+  .grid div { width:24px; height:24px; font-size:10px; display:flex; align-items:center; justify-content:center; }
+  .c-wall { background:var(--wall); } .c-shelf { background:var(--shelf); } .c-aisle { background:var(--aisle); }
+  .c-path { background:var(--path); } .c-target { background:var(--target); color:#fff; }
+  .c-start { background:var(--ok); color:#fff; font-weight:bold; } .c-pallet { background:#a16207; color:#fff; }
+  .error { color:var(--bad); font-weight:600; }
+  .loading { color:var(--muted); }
+  pre { background:#0f172a; color:#e2e8f0; padding:12px; border-radius:8px; overflow:auto; font-size:12px; max-height:320px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mini-WMS</h1>
+  <p>Depozitul nostru de exercitiu, acum si cu o interfata.</p>
+</header>
+
+<nav id="tabs">
+  <button data-tab="cautare" class="active">Cautare produs</button>
+  <button data-tab="coada">Coada de comenzi</button>
+  <button data-tab="drum">Drum in depozit</button>
+  <button data-tab="ruta">Ruta unei comenzi</button>
+  <button data-tab="camion">Camion</button>
+</nav>
+
+<main>
+  <section id="cautare" class="active">
+    <h2>Cautare produs dupa cod (Exercitiul 1)</h2>
+    <p class="hint">Compara numarul de comparatii: secvential vs. binar, in 200.000 de coduri.</p>
+    <form data-action="cautare">
+      <label>Cod produs <input name="cod" value="PROD-0791900"></label>
+      <button>Cauta</button>
+    </form>
+    <div class="out"></div>
+  </section>
+
+  <section id="coada">
+    <h2>Coada de pregatire (Exercitiul 3)</h2>
+    <p class="hint">Ordinea in care se pregatesc comenzile: prioritate, apoi vechime, apoi numar.</p>
+    <form data-action="coada">
+      <label>Cate comenzi <input name="limita" type="number" value="15" min="1" max="100"></label>
+      <button>Afiseaza</button>
+    </form>
+    <div class="out"></div>
+  </section>
+
+  <section id="drum">
+    <h2>Drumul cel mai scurt (Exercitiul 7)</h2>
+    <p class="hint">Galben = drumul, albastru = destinatia, maro = un palet pe culoar.</p>
+    <form data-action="drum">
+      <label>De la <input name="de_la" value="START"></label>
+      <label>Spre <input name="spre" value="W08"></label>
+      <button>Calculeaza</button>
+    </form>
+    <div class="out"></div>
+  </section>
+
+  <section id="ruta">
+    <h2>Ruta de colectare a unei comenzi (Exercitiul 8)</h2>
+    <p class="hint">Cel mai apropiat vecin (rapid) vs. toate variantele (exact). Exemplu interesant: CMD-00017.</p>
+    <form data-action="ruta">
+      <label>Comanda <input name="numar" value="CMD-00017"></label>
+      <button>Calculeaza</button>
+    </form>
+    <div class="out"></div>
+  </section>
+
+  <section id="camion">
+    <h2>Ce incarcam in camion? (Exercitiul 6)</h2>
+    <p class="hint">Metoda lacoma vs. toate combinatiile, pe primele comenzi din coada (maximum 20).</p>
+    <form data-action="camion">
+      <label>Capacitate (kg) <input name="capacitate" type="number" value="800"></label>
+      <label>Comenzi luate in calcul <input name="comenzi" type="number" value="15" max="20"></label>
+      <button>Calculeaza</button>
+    </form>
+    <div class="out"></div>
+  </section>
+</main>
+
+<script>
+// ---------- utilitare ----------
+async function api(path, params) {
+  const url = '/api' + path + '?' + new URLSearchParams(params);
+  const response = await fetch(url);
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.eroare || 'Eroare ' + response.status);
+  return data;
+}
+
+function stat(title, value, note = '') {
+  return `<div class="stat"><small>${title}</small><b>${value}</b><small>${note}</small></div>`;
+}
+
+// Deseneaza harta primita de la API (lista de randuri text) ca un grid colorat.
+function drawMap(lines) {
+  const rows = lines.slice(1).map(line => line.slice(4)); // scoatem antetul si numerele de rand
+  const cls = { '#': 'c-wall', '=': 'c-shelf', '.': 'c-aisle', '*': 'c-path', 'o': 'c-target', 'S': 'c-start', 'P': 'c-pallet' };
+  const cells = rows.flatMap(row => [...row].map(ch => `<div class="${cls[ch] || ''}">${ch === 'S' || ch === 'P' ? ch : ''}</div>`));
+  return `<div class="grid" style="grid-template-columns: repeat(${rows[0].length}, 24px)">${cells.join('')}</div>`;
+}
+
+// ---------- fiecare formular ----------
+const handlers = {
+  async cautare(form) {
+    const cod = form.cod.value;
+    const [sec, bin] = await Promise.all([
+      api('/catalog/cautare', { cod, metoda: 'secventiala' }),
+      api('/catalog/cautare', { cod, metoda: 'binara' }),
+    ]);
+    return `<div class="cards">
+      ${stat('Gasit?', bin.gasit ? 'DA, pozitia ' + bin.pozitie : 'NU')}
+      ${stat('Comparatii secvential', sec.comparatii.toLocaleString('ro-RO'), sec.timpMs + ' ms')}
+      ${stat('Comparatii binar', bin.comparatii, bin.timpMs + ' ms')}
+    </div>`;
+  },
+
+  async coada(form) {
+    const d = await api('/comenzi/coada', { limita: form.limita.value });
+    const rows = d.coada.map((c, i) => `<tr><td>${i + 1}</td><td>${c.numar}</td><td>${c.client}</td><td>${c.prioritate}</td><td>${c.dataCreare}</td></tr>`);
+    return `<div class="cards">${stat('Comenzi sortate', d.totalComenzi, d.timpMs + ' ms')}</div>
+      <table><tr><th>#</th><th>Numar</th><th>Client</th><th>Prioritate</th><th>Data</th></tr>${rows.join('')}</table>`;
+  },
+
+  async drum(form) {
+    const d = await api('/depozit/drum', { de_la: form.de_la.value, spre: form.spre.value });
+    return `<div class="cards">
+      ${stat('Pasi', d.pasi ?? '-')}
+      ${stat('Celule verificate', d.celuleVerificate)}
+    </div>${drawMap(d.harta)}`;
+  },
+
+  async ruta(form) {
+    const d = await api('/comenzi/' + encodeURIComponent(form.numar.value) + '/ruta', {});
+    const nn = d.celMaiApropiatVecin, best = d.toateVariantele;
+    return `<div class="cards">
+      ${stat('Cel mai apropiat vecin', nn.pasi + ' pasi', nn.ruta.join(' → '))}
+      ${stat('Toate variantele (optim)', best.pasi + ' pasi', best.ruta.join(' → '))}
+      ${stat('Rute verificate', best.ruteVerificate.toLocaleString('ro-RO'), best.timpMs + ' ms')}
+    </div>${drawMap(d.harta)}`;
+  },
+
+  async camion(form) {
+    const d = await api('/camion/plan', { capacitate: form.capacitate.value, comenzi: form.comenzi.value });
+    const lei = v => v.toLocaleString('ro-RO') + ' lei';
+    return `<div class="cards">
+      ${stat('Metoda lacoma', lei(d.metodaLacoma.valoare), d.metodaLacoma.greutate + ' kg, ' + d.metodaLacoma.alese.length + ' comenzi')}
+      ${stat('Toate combinatiile', lei(d.toateCombinatiile.valoare), d.toateCombinatiile.greutate + ' kg, ' + d.toateCombinatiile.varianteVerificate.toLocaleString('ro-RO') + ' variante verificate')}
+      ${stat('Diferenta', lei(d.toateCombinatiile.valoare - d.metodaLacoma.valoare))}
+    </div>
+    <table><tr><th>Comanda</th><th>Greutate</th><th>Valoare</th><th>Lacoma</th><th>Toate combinatiile</th></tr>
+      ${d.comenziDinCoada.map(c => `<tr><td>${c.nume}</td><td>${c.greutate} kg</td><td>${lei(c.valoare)}</td>
+        <td>${d.metodaLacoma.alese.includes(c.nume) ? '✔' : ''}</td><td>${d.toateCombinatiile.alese.includes(c.nume) ? '✔' : ''}</td></tr>`).join('')}
+    </table>`;
+  },
+};
+
+// ---------- legarea butoanelor ----------
+document.querySelectorAll('form[data-action]').forEach(form => {
+  form.addEventListener('submit', async event => {
+    event.preventDefault();
+    const out = form.parentElement.querySelector('.out');
+    out.innerHTML = '<p class="loading">Se incarca...</p>';
+    try {
+      out.innerHTML = await handlers[form.dataset.action](form);
+    } catch (error) {
+      out.innerHTML = `<p class="error">${error.message}</p>`;
+    }
+  });
+});
+
+document.getElementById('tabs').addEventListener('click', event => {
+  const tab = event.target.dataset.tab;
+  if (!tab) return;
+  document.querySelectorAll('nav button, section').forEach(el => el.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById(tab).classList.add('active');
+});
+</script>
+</body>
+</html>

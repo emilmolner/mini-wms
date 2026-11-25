@@ -1,0 +1,11 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: Mini-WMS
+            description: |
+                API-ul depozitului din mini-cursul de Proiectarea algoritmilor.
+                Apasa "Try it out", completeaza parametrii si apoi "Execute".
+            version: 1.0.0
+    areas:
+        path_patterns:
+            - ^/api(?!/doc)

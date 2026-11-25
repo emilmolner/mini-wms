@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "bmewburn.vscode-intelephense-client",
+        "humao.rest-client",
+        "ms-azuretools.vscode-docker"
+    ]
+}

@@ -1,0 +1,5 @@
+# Toate fisierele text se salveaza cu terminatii de linie Unix (LF), si pe Windows.
+# Altfel scripturile (bin/console) nu mai pornesc in containerul Linux.
+* text=auto eol=lf
+*.png binary
+*.pdf binary

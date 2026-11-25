@@ -1,0 +1,60 @@
+### Cereri gata facute pentru API-ul Mini-WMS.
+### In VS Code: instaleaza extensia "REST Client", apoi apasa "Send Request" deasupra unei cereri.
+### Aceleasi cereri se pot face si din pagina http://localhost:8000/api/doc
+
+@api = http://localhost:8000/api
+
+### Exercitiul 1 - cautare pe rand
+GET {{api}}/catalog/cautare?cod=PROD-0791900&metoda=secventiala
+
+### Exercitiul 1 - cautare binara
+GET {{api}}/catalog/cautare?cod=PROD-0791900&metoda=binara
+
+### Exercitiul 2 - ce coduri nu exista in catalog?
+POST {{api}}/catalog/verificare
+Content-Type: application/json
+
+{"coduri": ["PROD-0791900", "PROD-1583800", "PROD-INEXISTENT"]}
+
+### Exercitiul 2 - 200 de coduri: varianta naiva vs. "dulapul cu sertare"
+GET {{api}}/catalog/verificare-aleatoare?numar=200
+
+### Exercitiul 3 - coada de comenzi
+GET {{api}}/comenzi/coada?limita=10
+
+### Exercitiul 4a - cautare direct in MySQL (cu sau fara index?)
+GET {{api}}/catalog/produs?cod=PROD-0791900
+
+### Exercitiul 4b - raportul unui client: varianta naiva
+GET {{api}}/comenzi/raport?client=Bricolaj%20Bacau%20SRL&metoda=naiva
+
+### Exercitiul 4b - acelasi raport, cu JOIN
+GET {{api}}/comenzi/raport?client=Bricolaj%20Bacau%20SRL&metoda=join
+
+### Exercitiul 5 - in cate cutii incape comanda?
+GET {{api}}/comenzi/CMD-00587/impachetare?capacitate=30
+
+### Exercitiul 6 - exemplul mic (camion de 50 kg)
+POST {{api}}/camion/incarcare
+Content-Type: application/json
+
+{
+  "capacitate": 50,
+  "comenzi": [
+    {"nume": "Paleti gresie", "greutate": 10, "valoare": 60},
+    {"nume": "Saci ciment", "greutate": 20, "valoare": 100},
+    {"nume": "Cutii faianta", "greutate": 30, "valoare": 120}
+  ]
+}
+
+### Exercitiul 6 - camionul de azi, din coada de comenzi
+GET {{api}}/camion/plan?capacitate=800&comenzi=15
+
+### Harta depozitului
+GET {{api}}/depozit/harta
+
+### Exercitiul 7 - drumul cel mai scurt
+GET {{api}}/depozit/drum?spre=W08
+
+### Exercitiul 8 - ruta de colectare pentru o comanda
+GET {{api}}/comenzi/CMD-00017/ruta

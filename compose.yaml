@@ -1,0 +1,43 @@
+# Mini-WMS: doua containere
+#   wms-php    aplicatia Symfony   -> http://localhost:8000
+#   wms-mysql  baza de date MySQL  -> localhost:3307 (pentru DBeaver / MySQL Workbench)
+#
+# Pornire:  docker compose up -d --build
+# Oprire:   docker compose stop
+name: mini-wms
+
+services:
+  wms-php:
+    build: ./docker/php
+    container_name: wms-php
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: "mysql://wms:wms@wms-mysql:3306/wms?serverVersion=8.4&charset=utf8mb4"
+    volumes:
+      # codul din folderul app apare in container; ce salvezi in editor se vede imediat
+      - ./app:/app
+    depends_on:
+      wms-mysql:
+        condition: service_healthy
+
+  wms-mysql:
+    image: mysql:8.4
+    container_name: wms-mysql
+    environment:
+      MYSQL_DATABASE: wms
+      MYSQL_USER: wms
+      MYSQL_PASSWORD: wms
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3307:3306"
+    volumes:
+      - wms_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uwms", "-pwms"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  wms_mysql_data:
