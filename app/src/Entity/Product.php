@@ -19,27 +19,25 @@ class Product
     #[ORM\Column]
     private ?int $id = null;
 
-    /** codul produsului, de exemplu PROD-0791900 */
-    #[ORM\Column(length: 20)]
-    private string $code;
-
-    #[ORM\Column(length: 120)]
-    private string $name;
-
-    #[ORM\Column(length: 40)]
-    private string $category;
-
-    /** greutatea unei bucati, in kilograme (numar intreg, ca sa fie simplu) */
-    #[ORM\Column]
-    private int $weightKg;
-
-    /** pretul unei bucati, in lei */
-    #[ORM\Column]
-    private int $price;
-
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private Location $location;
+    public function __construct(
+        /** codul produsului, de exemplu PROD-0791900 */
+        #[ORM\Column(length: 20)]
+        private string $code,
+        #[ORM\Column(length: 120)]
+        private string $name,
+        #[ORM\Column(length: 40)]
+        private string $category,
+        /** greutatea unei bucati, in kilograme (numar intreg, ca sa fie simplu) */
+        #[ORM\Column]
+        private int $weightKg,
+        /** pretul unei bucati, in lei */
+        #[ORM\Column]
+        private int $price,
+        #[ORM\ManyToOne]
+        #[ORM\JoinColumn(nullable: false)]
+        private Location $location,
+    ) {
+    }
 
     public function getId(): ?int { return $this->id; }
     public function getCode(): string { return $this->code; }

@@ -20,26 +20,22 @@ class Order
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 20, unique: true)]
-    private string $number;
-
-    /** clientul comenzii; in tabela "orders" se salveaza doar id-ul lui, in coloana customer_id */
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private Customer $customer;
-
-    #[ORM\Column]
-    private int $priority;
-
-    #[ORM\Column]
-    private \DateTimeImmutable $createdAt;
-
     /** @var Collection<int, OrderLine> */
     #[ORM\OneToMany(targetEntity: OrderLine::class, mappedBy: 'order')]
     private Collection $lines;
 
-    public function __construct()
-    {
+    public function __construct(
+        #[ORM\Column(length: 20, unique: true)]
+        private string $number,
+        /** clientul comenzii; in tabela "orders" se salveaza doar id-ul lui, in coloana customer_id */
+        #[ORM\ManyToOne]
+        #[ORM\JoinColumn(nullable: false)]
+        private Customer $customer,
+        #[ORM\Column]
+        private int $priority,
+        #[ORM\Column]
+        private \DateTimeImmutable $createdAt,
+    ) {
         $this->lines = new ArrayCollection();
     }
 

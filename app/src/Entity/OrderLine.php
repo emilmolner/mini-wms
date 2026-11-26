@@ -13,16 +13,17 @@ class OrderLine
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'lines')]
-    #[ORM\JoinColumn(nullable: false)]
-    private Order $order;
-
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private Product $product;
-
-    #[ORM\Column]
-    private int $quantity;
+    public function __construct(
+        #[ORM\ManyToOne(inversedBy: 'lines')]
+        #[ORM\JoinColumn(nullable: false)]
+        private Order $order,
+        #[ORM\ManyToOne]
+        #[ORM\JoinColumn(nullable: false)]
+        private Product $product,
+        #[ORM\Column]
+        private int $quantity,
+    ) {
+    }
 
     public function getId(): ?int { return $this->id; }
     public function getOrder(): Order { return $this->order; }
