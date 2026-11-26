@@ -484,6 +484,18 @@ Algoritmii nu trăiesc doar în codul PHP. Și baza de date folosește aceleași
 1. De ce se numește „N+1”?
 2. Problema asta apare foarte des în aplicațiile reale. De ce credeți că nu se observă când ai doar 5 comenzi de test?
 
+### Debug ca la serviciu: Symfony Profiler
+
+Symfony ține minte, în modul de dezvoltare, tot ce s-a întâmplat la fiecare cerere: timpul, memoria, erorile și **fiecare query SQL**. Unealta se numește **Symfony Profiler** (*Web Profiler*) și o folosim zilnic la serviciu ca să găsim probleme ca N+1.
+
+1. Fă o cerere, de exemplu `GET /api/comenzi/raport?metoda=naiva` din Swagger, sau apasă „Compară” în tabul „4. Baza de date” din pagina web.
+2. Deschide **http://localhost:8000/_profiler**. Vezi ultimele cereri; alege-o pe cea cu `/api/comenzi/raport`. Din pagina web ajungi direct acolo, cu linkul 🔎 de lângă rezultat.
+3. În stânga, alege **Doctrine**. Vezi câte query-uri s-au trimis și cât au durat.
+4. Tabul **Grouped Statements** (deschis implicit) adună cele 1.671 de query-uri în 3 rânduri, cu coloana **Count** (de câte ori s-a trimis fiecare), la fel ca în pagina noastră. Cu **Show all queries** le vezi pe toate, unul câte unul.
+5. Lângă un query, apasă **Explain query**: vezi același tabel `EXPLAIN` ca la Exercițiul 4a, cu coloana `key`.
+
+Fă același lucru pentru `metoda=join` și compară. Același panou te ajută și la 4a: caută produsul, apoi apasă „Explain query” înainte și după ce adaugi indexul.
+
 ---
 
 <a id="întâlnirea-2"></a>
@@ -783,6 +795,7 @@ EXPLAIN ANALYZE SELECT * FROM product WHERE code = 'PROD-0791900';
 | **Comparator** | funcția care spune care din două elemente vine primul |
 | **Index (bază de date)** | cuprinsul unei coloane, ținut sortat |
 | **Problema N+1** | o interogare pentru listă, plus câte una pentru fiecare element |
+| **Symfony Profiler** | pagina `/_profiler`: tot ce s-a întâmplat la o cerere (query-uri, timp, erori) |
 | **Metoda lacomă (greedy)** | la fiecare pas alegi ce pare mai bun acum, fără să revii |
 | **Parcurgerea în lățime (BFS)** | explorezi „în valuri”, de la cel mai apropiat la cel mai depărtat |
 | **Recursivitate** | o funcție care se apelează pe ea însăși, pe o problemă mai mică |

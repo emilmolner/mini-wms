@@ -82,11 +82,19 @@ final class OrderController extends AbstractController
             $report[] = ['numar' => $order->getNumber(), 'produse' => $products];
         }
 
+        // query-urile trimise, grupate: acelasi SQL (cu alt parametru) se numara o singura data, cu "deCateOri"
+        $queries = array_column($sqlLog->getData()['default'] ?? [], 'sql');
+        $groups = [];
+        foreach (array_count_values($queries) as $sql => $times) {
+            $groups[] = ['deCateOri' => $times, 'sql' => $sql];
+        }
+
         return $this->json([
             'client' => $client,
             'metoda' => $method,
             'comenzi' => \count($report),
-            'queryuriSql' => \count($sqlLog->getData()['default'] ?? []),
+            'queryuriSql' => \count($queries),
+            'tipuriDeQuery' => $groups,
             'timpMs' => round((hrtime(true) - $start) / 1e6, 3),
             'primeleDoua' => \array_slice($report, 0, 2),
         ]);

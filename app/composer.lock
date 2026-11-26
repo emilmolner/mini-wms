@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c8d16fc701d9b4a8a3945d4e2a02e1bc",
+    "content-hash": "74c6d1281b1e3955d1d6e9d0df93fa0b",
     "packages": [
         {
             "name": "doctrine/collections",
@@ -7749,6 +7749,92 @@
             ],
             "time": "2026-11-23T09:20:57+00:00",
             "published-time": "2026-11-25T09:29:08+00:00"
+        },
+        {
+            "name": "symfony/web-profiler-bundle",
+            "version": "v8.1.12",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/web-profiler-bundle.git",
+                "reference": "bce57d6981b66a240d85412372520d35bf581f5a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/web-profiler-bundle/zipball/bce57d6981b66a240d85412372520d35bf581f5a",
+                "reference": "bce57d6981b66a240d85412372520d35bf581f5a",
+                "shasum": ""
+            },
+            "require": {
+                "composer-runtime-api": ">=2.1",
+                "php": ">=8.4.1",
+                "symfony/config": "^7.4|^8.0",
+                "symfony/framework-bundle": "^7.4|^8.0",
+                "symfony/http-kernel": "^8.1",
+                "symfony/routing": "^7.4|^8.0",
+                "symfony/twig-bundle": "^7.4|^8.0"
+            },
+            "conflict": {
+                "symfony/serializer": "<7.4",
+                "symfony/workflow": "<7.4"
+            },
+            "require-dev": {
+                "symfony/browser-kit": "^7.4|^8.0",
+                "symfony/console": "^7.4|^8.0",
+                "symfony/css-selector": "^7.4|^8.0",
+                "symfony/runtime": "^7.4|^8.0",
+                "symfony/stopwatch": "^7.4|^8.0"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Bundle\\WebProfilerBundle\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Provides a development tool that gives detailed information about the execution of any request",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "dev"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/web-profiler-bundle/tree/v8.1.12"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-11-12T10:29:11+00:00",
+            "published-time": "2026-11-25T09:29:57+00:00"
         }
     ],
     "aliases": [],
