@@ -13,9 +13,19 @@ class Customer
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 80)]
-    private string $name;
+    public function __construct(
+        #[ORM\Column(length: 80)]
+        private string $name,
+    ) {
+    }
 
-    public function getId(): ?int { return $this->id; }
-    public function getName(): string { return $this->name; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
 }

@@ -260,7 +260,7 @@ final class OrderController extends AbstractController
     /**
      * Datele comenzii pentru afisare: clientul, prioritatea, data si produsele (cu cantitate si greutate).
      *
-     * @param list<array{code: string, name: string, weight_kg: int, quantity: int, location: string}> $lines
+     * @param list<array{code: string, name: string, weight_kg: int, quantity: int, location: string, map_row: int, map_col: int}> $lines
      */
     private function orderDetails(string $number, array $lines): array
     {
