@@ -145,11 +145,15 @@ final class OrderController extends AbstractController
         $best = $picking->allRoutes($dist);
         $bestMs = (hrtime(true) - $start) / 1e6;
 
-        // drumul complet (celula cu celula) al rutei "cel mai apropiat vecin", pentru desen
-        $fullPath = [];
-        for ($i = 1; $i < \count($nn); ++$i) {
-            $fullPath = [...$fullPath, ...($pathFinder->shortestPath($map, $positions[$nn[$i - 1]], $positions[$nn[$i]]) ?? [])];
-        }
+        // drumul complet al unei rute, celula cu celula (pentru desenul din pagina web)
+        $fullPath = function (array $route) use ($pathFinder, $map, $positions): array {
+            $cells = [];
+            for ($i = 1; $i < \count($route); ++$i) {
+                $cells = [...$cells, ...($pathFinder->shortestPath($map, $positions[$route[$i - 1]], $positions[$route[$i]]) ?? [])];
+            }
+
+            return array_map(fn (array $cell) => WarehouseMap::code(...$cell), $cells);
+        };
 
         $toCodes = fn (array $route) => array_map(fn (int $i) => $codes[$i], $route);
 
@@ -161,14 +165,16 @@ final class OrderController extends AbstractController
                 'ruta' => $toCodes($nn),
                 'pasi' => PickingRoute::length($dist, $nn),
                 'timpMs' => round($nnMs, 3),
+                'drumComplet' => $fullPath($nn),
             ],
             'toateVariantele' => [
                 'ruta' => $toCodes($best),
                 'pasi' => PickingRoute::length($dist, $best),
                 'ruteVerificate' => $picking->routesChecked,
                 'timpMs' => round($bestMs, 3),
+                'drumComplet' => $fullPath($best),
             ],
-            'harta' => $map->render($fullPath, \array_slice($positions, 1)),
+            'harta' => $map->render(),
         ]);
     }
 

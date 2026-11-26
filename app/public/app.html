@@ -40,6 +40,16 @@
   .c-wall { background:var(--wall); } .c-shelf { background:var(--shelf); } .c-aisle { background:var(--aisle); }
   .c-path { background:var(--path); } .c-target { background:var(--target); color:#fff; }
   .c-start { background:var(--ok); color:#fff; font-weight:bold; } .c-pallet { background:#a16207; color:#fff; }
+  .grid .c-target { font-weight:bold; font-size:12px; }
+  .grid .axis { background:var(--card); color:var(--muted); font-size:9px; }
+  .legend { display:flex; flex-wrap:wrap; gap:6px 14px; margin-top:10px; font-size:13px; color:var(--muted); }
+  .legend span { display:flex; align-items:center; gap:5px; }
+  .legend i { width:14px; height:14px; border-radius:3px; border:1px solid #cbd5e1; display:inline-block; }
+  .toggle { display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 8px; }
+  .toggle button { border:1px solid #d1d5db; background:#fff; padding:7px 12px; border-radius:8px; cursor:pointer; font-size:14px; }
+  .toggle button.active { background:var(--path); border-color:var(--path); font-weight:600; }
+  .prio { display:inline-block; min-width:22px; text-align:center; border-radius:6px; padding:1px 6px; font-weight:600; }
+  .prio.p1 { background:#fee2e2; color:#b91c1c; } .prio.p2 { background:#fef3c7; color:#92400e; } .prio.p3 { background:#f1f5f9; color:#64748b; }
   .error { color:var(--bad); font-weight:600; }
   .loading { color:var(--muted); }
   pre { background:#0f172a; color:#e2e8f0; padding:12px; border-radius:8px; overflow:auto; font-size:12px; max-height:320px; }
@@ -82,7 +92,7 @@
 
   <section id="drum">
     <h2>Drumul cel mai scurt (Exercitiul 7)</h2>
-    <p class="hint">Galben = drumul, albastru = destinatia, maro = un palet pe culoar.</p>
+    <p class="hint">Codul unei locatii = litera coloanei + numarul randului (W08 = coloana W, randul 08). Tine mouse-ul pe o celula ca sa-i vezi codul.</p>
     <form data-action="drum">
       <label>De la <input name="de_la" value="START"></label>
       <label>Spre <input name="spre" value="W08"></label>
@@ -93,7 +103,7 @@
 
   <section id="ruta">
     <h2>Ruta de colectare a unei comenzi (Exercitiul 8)</h2>
-    <p class="hint">Cel mai apropiat vecin (rapid) vs. toate variantele (exact). Exemplu interesant: CMD-00017.</p>
+    <p class="hint">Cel mai apropiat vecin (rapid) vs. toate variantele (exact). Cifrele de pe harta arata ordinea opririlor. Exemplu interesant: CMD-00017.</p>
     <form data-action="ruta">
       <label>Comanda <input name="numar" value="CMD-00017"></label>
       <button>Calculeaza</button>
@@ -132,12 +142,55 @@ function stat(title, value, note = '') {
   return `<div class="stat"><small>${esc(title)}</small><b>${esc(value)}</b><small>${esc(note)}</small></div>`;
 }
 
-// Deseneaza harta primita de la API (lista de randuri text) ca un grid colorat.
-function drawMap(lines) {
-  const rows = lines.slice(1).map(line => line.slice(4)); // scoatem antetul si numerele de rand
-  const cls = { '#': 'c-wall', '=': 'c-shelf', '.': 'c-aisle', '*': 'c-path', 'o': 'c-target', 'S': 'c-start', 'P': 'c-pallet' };
-  const cells = rows.flatMap(row => [...row].map(ch => `<div class="${cls[ch] || ''}">${ch === 'S' || ch === 'P' ? ch : ''}</div>`));
-  return `<div class="grid" style="grid-template-columns: repeat(${rows[0].length}, 24px)">${cells.join('')}</div>`;
+// ---------- harta depozitului ----------
+// Codul unei celule: litera coloanei + randul pe doua cifre (coloana 22, randul 8 => "W08").
+function cellCode(row, col) {
+  return String.fromCharCode(65 + col) + String(row).padStart(2, '0');
+}
+
+// Deseneaza harta primita de la API (lista de randuri text) ca un grid colorat,
+// cu literele coloanelor sus si numerele randurilor in stanga.
+// marks: celulele evidentiate cu albastru, de exemplu { "W08": "" } sau { "B02": "1", "H03": "2" }.
+function drawMap(lines, marks = {}) {
+  // scoatem antetul si numerele de rand; "*" (drumul) si "o" (tinta) le desenam noi
+  const rows = lines.slice(1).map(line => line.slice(4).replace(/[*o]/g, '.'));
+  const cls = { '#': 'c-wall', '=': 'c-shelf', '.': 'c-aisle', 'S': 'c-start', 'P': 'c-pallet' };
+
+  const cells = ['<div class="axis"></div>'];
+  for (let col = 0; col < rows[0].length; ++col) {
+    cells.push(`<div class="axis">${String.fromCharCode(65 + col)}</div>`);
+  }
+  rows.forEach((row, r) => {
+    cells.push(`<div class="axis">${String(r).padStart(2, '0')}</div>`);
+    [...row].forEach((ch, c) => {
+      const code = cellCode(r, c);
+      const marked = code in marks;
+      const text = marked ? marks[code] : (ch === 'S' || ch === 'P' ? ch : '');
+      cells.push(`<div class="${marked ? 'c-target' : cls[ch] || ''}" data-cell="${code}" title="${code}">${esc(text)}</div>`);
+    });
+  });
+
+  const legend = [
+    ['c-wall', 'perete'], ['c-shelf', 'raft'], ['c-aisle', 'culoar'], ['c-start', 'S = start (rampa)'],
+    ['c-pallet', 'P = palet pe culoar'], ['c-path', 'drumul'], ['c-target', 'destinatie / oprire'],
+  ].map(([c, t]) => `<span><i class="${c}"></i>${t}</span>`).join('');
+
+  return `<div class="grid" style="grid-template-columns: repeat(${rows[0].length + 1}, 24px)">${cells.join('')}</div>
+    <div class="legend">${legend}</div>`;
+}
+
+// Coloreaza drumul celula cu celula, ca sa se vada cum inainteaza omul prin depozit.
+function animatePath(grid, codes) {
+  let i = 0;
+  const step = () => {
+    if (i >= codes.length) return;
+    const cell = grid.querySelector(`[data-cell="${codes[i++]}"]`);
+    if (cell && !cell.classList.contains('c-start') && !cell.classList.contains('c-target')) {
+      cell.className = 'c-path';
+    }
+    setTimeout(step, 30);
+  };
+  step();
 }
 
 // ---------- fiecare formular ----------
@@ -157,7 +210,7 @@ const handlers = {
 
   async coada(form) {
     const d = await api('/comenzi/coada', { limita: form.limita.value });
-    const rows = d.coada.map((c, i) => `<tr><td>${i + 1}</td><td>${esc(c.numar)}</td><td>${esc(c.client)}</td><td>${c.prioritate}</td><td>${esc(c.dataCreare)}</td></tr>`);
+    const rows = d.coada.map((c, i) => `<tr><td>${i + 1}</td><td>${esc(c.numar)}</td><td>${esc(c.client)}</td><td><span class="prio p${c.prioritate}">${c.prioritate}</span></td><td>${esc(c.dataCreare)}</td></tr>`);
     return `<div class="cards">${stat('Comenzi sortate', d.totalComenzi, d.timpMs + ' ms')}</div>
       <table><tr><th>#</th><th>Numar</th><th>Client</th><th>Prioritate</th><th>Data</th></tr>${rows.join('')}</table>`;
   },
@@ -165,20 +218,47 @@ const handlers = {
   async drum(form) {
     const d = await api('/depozit/drum', { de_la: form.de_la.value, spre: form.spre.value });
     const warning = d.gasit ? '' : '<p class="error">Nu s-a gasit niciun drum. Ai rezolvat Exercitiul 7 (PathFinder.php)?</p>';
-    return `${warning}<div class="cards">
-      ${stat('Pasi', d.pasi ?? '-')}
-      ${stat('Celule verificate', d.celuleVerificate)}
-    </div>${drawMap(d.harta)}`;
+    const target = d.drum.length ? d.drum[d.drum.length - 1] : form.spre.value.trim().toUpperCase();
+    return {
+      html: `${warning}<div class="cards">
+        ${stat('Pasi', d.pasi ?? '-')}
+        ${stat('Celule verificate', d.celuleVerificate)}
+      </div>${drawMap(d.harta, { [target]: '' })}`,
+      after: out => animatePath(out.querySelector('.grid'), d.drum),
+    };
   },
 
   async ruta(form) {
     const d = await api('/comenzi/' + encodeURIComponent(form.numar.value) + '/ruta', {});
-    const nn = d.celMaiApropiatVecin, best = d.toateVariantele;
-    return `<div class="cards">
-      ${stat('Cel mai apropiat vecin', nn.pasi + ' pasi', nn.ruta.join(' → '))}
-      ${stat('Toate variantele (optim)', best.pasi + ' pasi', best.ruta.join(' → '))}
-      ${stat('Rute verificate', best.ruteVerificate.toLocaleString('ro-RO'), best.timpMs + ' ms')}
-    </div>${drawMap(d.harta)}`;
+    const routes = { nn: d.celMaiApropiatVecin, best: d.toateVariantele };
+    const html = `<div class="cards">
+        ${stat('Cel mai apropiat vecin', routes.nn.pasi + ' pasi', routes.nn.timpMs + ' ms')}
+        ${stat('Toate variantele (optim)', routes.best.pasi + ' pasi', routes.best.timpMs + ' ms')}
+        ${stat('Rute verificate', routes.best.ruteVerificate.toLocaleString('ro-RO'))}
+      </div>
+      <div class="toggle">
+        <button data-route="nn">Cel mai apropiat vecin (${routes.nn.pasi} pasi)</button>
+        <button data-route="best">Toate variantele (${routes.best.pasi} pasi)</button>
+      </div>
+      <p class="hint route-text"></p>
+      <div class="map"></div>`;
+
+    // la apasarea unui buton desenam ruta aleasa: opririle numerotate 1, 2, 3... si drumul animat
+    const after = out => {
+      const show = key => {
+        const route = routes[key];
+        const marks = {};
+        route.ruta.filter(code => code !== 'START').forEach((code, i) => { marks[code] = String(i + 1); });
+        out.querySelector('.map').innerHTML = drawMap(d.harta, marks);
+        out.querySelector('.route-text').textContent = route.ruta.join(' → ');
+        out.querySelectorAll('[data-route]').forEach(b => b.classList.toggle('active', b.dataset.route === key));
+        animatePath(out.querySelector('.grid'), route.drumComplet);
+      };
+      out.querySelectorAll('[data-route]').forEach(b => b.addEventListener('click', () => show(b.dataset.route)));
+      show('nn');
+    };
+
+    return { html, after };
   },
 
   async camion(form) {
@@ -203,7 +283,10 @@ document.querySelectorAll('form[data-action]').forEach(form => {
     const out = form.parentElement.querySelector('.out');
     out.innerHTML = '<p class="loading">Se incarca...</p>';
     try {
-      out.innerHTML = await handlers[form.dataset.action](form);
+      // un handler intoarce fie HTML, fie { html, after }; "after" ruleaza dupa ce HTML-ul e pe pagina
+      const result = await handlers[form.dataset.action](form);
+      out.innerHTML = typeof result === 'string' ? result : result.html;
+      if (result.after) result.after(out);
     } catch (error) {
       out.innerHTML = `<p class="error">${esc(error.message)}</p>`;
     }
