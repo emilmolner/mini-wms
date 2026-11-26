@@ -49,7 +49,28 @@ final class PickingRoute
         //
         //  $route[] = 0;        // ne intoarcem la START
         //  return $route;
-        return [...range(0, $n - 1), 0];
+        $route = [0];
+        $current = 0;
+        $notVisited = [];
+        for ($i = 1; $i < $n; ++$i) {
+            $notVisited[$i] = true;
+        }
+
+        while ([] !== $notVisited) {
+            $next = null;
+            foreach (array_keys($notVisited) as $candidate) {
+                if (null === $next || $dist[$current][$candidate] < $dist[$current][$next]) {
+                    $next = $candidate;
+                }
+            }
+            $route[] = $next;
+            unset($notVisited[$next]);
+            $current = $next;
+        }
+
+        $route[] = 0;
+
+        return $route;
     }
 
     /**

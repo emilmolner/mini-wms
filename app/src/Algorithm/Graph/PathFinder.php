@@ -50,6 +50,26 @@ final class PathFinder
         //              $queue->enqueue($next);
         //
         //  return null;    // coada s-a golit si nu am ajuns: nu exista drum
+        $queue = new \SplQueue();
+        $queue->enqueue($from);
+        $cameFrom = [self::key($from) => null];
+
+        while (!$queue->isEmpty()) {
+            $cell = $queue->dequeue();
+            ++$this->visited;
+
+            if ($cell === $to) {
+                return $this->buildPath($cameFrom, $to);
+            }
+
+            foreach ($map->neighbors($cell[0], $cell[1]) as $next) {
+                if (!\array_key_exists(self::key($next), $cameFrom)) {
+                    $cameFrom[self::key($next)] = $cell;
+                    $queue->enqueue($next);
+                }
+            }
+        }
+
         return null;
     }
 

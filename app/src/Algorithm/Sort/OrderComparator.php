@@ -39,6 +39,14 @@ final class OrderComparator
         //  return $a['numar'] <=> $b['numar'];
         //
         //  (datele sunt texte de forma "2026-11-20 09:15:00", asa ca se pot compara direct)
-        return 0;
+        if ($a['prioritate'] !== $b['prioritate']) {
+            return $a['prioritate'] <=> $b['prioritate'];
+        }
+
+        if ($a['dataCreare'] !== $b['dataCreare']) {
+            return $a['dataCreare'] <=> $b['dataCreare'];
+        }
+
+        return $a['numar'] <=> $b['numar'];
     }
 }

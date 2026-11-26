@@ -45,6 +45,24 @@ final class BinarySearch
         //      altfel                                   => $right = $middle - 1;  (mergem la stanga)
         //
         //  return -1;   // zona a ramas goala: codul nu exista
+        $left = 0;
+        $right = \count($sortedCodes) - 1;
+
+        while ($left <= $right) {
+            $middle = intdiv($left + $right, 2);
+            ++$this->comparisons;
+
+            if ($sortedCodes[$middle] === $target) {
+                return $middle;
+            }
+
+            if ($sortedCodes[$middle] < $target) {
+                $left = $middle + 1;
+            } else {
+                $right = $middle - 1;
+            }
+        }
+
         return -1;
     }
 }

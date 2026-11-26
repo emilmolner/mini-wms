@@ -70,7 +70,23 @@ final class BoxPacker
         //              $boxes[$k][] = $weight;  $placed = true;  break;
         //      daca !$placed  =>  $boxes[] = [$weight];      // cutie noua
         //  return $boxes;
-        return [];
+        $boxes = [];
+
+        foreach ($weights as $weight) {
+            $placed = false;
+            foreach ($boxes as $k => $box) {
+                if (array_sum($box) + $weight <= $capacity) {
+                    $boxes[$k][] = $weight;
+                    $placed = true;
+                    break;
+                }
+            }
+            if (!$placed) {
+                $boxes[] = [$weight];
+            }
+        }
+
+        return $boxes;
     }
 
     /**
@@ -85,6 +101,8 @@ final class BoxPacker
     public function firstFitDecreasing(array $weights, int $capacity): array
     {
         // TODO EXERCITIUL 5b: sorteaza $weights descrescator (functia rsort), apoi return $this->firstFit(...)
+        rsort($weights);
+
         return $this->firstFit($weights, $capacity);
     }
 

@@ -45,7 +45,20 @@ final class TruckLoader
         //         daca $weight + $item['greutate'] <= $capacity:
         //             il adaugi: $chosen[] = $item['nume']; $weight += ...; $value += ...;
         //  3. return ['valoare' => $value, 'greutate' => $weight, 'alese' => $chosen];
-        return ['valoare' => 0, 'greutate' => 0, 'alese' => []];
+        usort($items, fn (array $a, array $b) => $b['valoare'] / $b['greutate'] <=> $a['valoare'] / $a['greutate']);
+
+        $chosen = [];
+        $weight = 0;
+        $value = 0;
+        foreach ($items as $item) {
+            if ($weight + $item['greutate'] <= $capacity) {
+                $chosen[] = $item['nume'];
+                $weight += $item['greutate'];
+                $value += $item['valoare'];
+            }
+        }
+
+        return ['valoare' => $value, 'greutate' => $weight, 'alese' => $chosen];
     }
 
     /**

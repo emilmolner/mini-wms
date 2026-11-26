@@ -37,6 +37,13 @@ class OrderRepository extends ServiceEntityRepository
         // TODO EXERCITIUL 4b: adauga cele doua JOIN-uri (cu addSelect, ca Doctrine sa si incarce datele):
         //     ->leftJoin('o.lines', 'l')->addSelect('l')
         //     ->leftJoin('l.product', 'p')->addSelect('p')
-        return $this->createQueryBuilder('o')->where('o.customer = :customer')->setParameter('customer', $customerId)->orderBy('o.id', 'ASC')->getQuery()->getResult();
+        return $this->createQueryBuilder('o')
+            ->leftJoin('o.lines', 'l')->addSelect('l')
+            ->leftJoin('l.product', 'p')->addSelect('p')
+            ->where('o.customer = :customer')
+            ->setParameter('customer', $customerId)
+            ->orderBy('o.id', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 }

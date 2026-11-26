@@ -81,6 +81,20 @@ final class MissingCodeFinder
         //          daca NU isset($index[$code])  =>  $missing[] = $code;
         //
         //  return $missing;
-        return [];
+        $index = [];
+        foreach ($catalog as $code) {
+            $index[$code] = true;
+            ++$this->operations;
+        }
+
+        $missing = [];
+        foreach ($requested as $code) {
+            ++$this->operations;
+            if (!isset($index[$code])) {
+                $missing[] = $code;
+            }
+        }
+
+        return $missing;
     }
 }

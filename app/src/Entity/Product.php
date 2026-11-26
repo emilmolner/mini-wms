@@ -11,7 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
  * In engleza: Database Index (in MySQL, un B-Tree); fara index, MySQL face "Full Table Scan".
  */
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
-// TODO EXERCITIUL 4a: aici adaugi linia  #[ORM\Index(name: 'idx_product_code', columns: ['code'])]
+#[ORM\Index(name: 'idx_product_code', columns: ['code'])]
 class Product
 {
     #[ORM\Id]
