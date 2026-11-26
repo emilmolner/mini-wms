@@ -678,13 +678,15 @@ docker exec wms-php php bin/phpunit --testdox
 
 Până acum am folosit API-ul din Swagger. Un API e făcut ca **alte programe** să-l folosească: o aplicație de mobil, un cititor de coduri de bare, o pagină web.
 
-Deschide **http://localhost:8000/app.html**. E o singură pagină HTML (`app/public/app.html`), fără biblioteci și fără instalări, care apelează API-ul nostru cu `fetch()` și desenează rezultatele. Harta depozitului apare colorată.
+Deschide **http://localhost:8000/app.html**. E o singură pagină HTML (`app/public/app.html`), fără biblioteci și fără instalări, care apelează API-ul nostru cu `fetch()` și desenează rezultatele. Are câte un tab pentru fiecare exercițiu, de la 1 la 8: cutiile se văd ca dreptunghiuri, iar drumul și ruta se desenează animat pe hartă.
+
+Un tab arată rezultatul corect doar după ce ai rezolvat exercițiul lui. De exemplu, la „7. Drum în depozit”, drumul galben apare abia după Exercițiul 7.
 
 **Ce poți încerca** (alege una):
 
 1. **Ușor:** schimbă culorile hărții (variabilele din `:root`, la începutul fișierului).
-2. **Mediu:** adaugă un tab nou, „Cutii”, care apelează `/api/comenzi/{numar}/impachetare` și afișează numărul de cutii pentru fiecare regulă. Copiază modelul tabului „Ruta unei comenzi”.
-3. **Mai greu:** la tabul „Cutii”, desenează fiecare cutie ca un dreptunghi, cu bucățile din ea.
+2. **Mediu:** la tabul „6. Camion”, desenează două bare orizontale care arată cât s-a umplut camionul cu fiecare metodă (de exemplu 600 din 800 kg = bară plină 75%). Te poți inspira din modul în care sunt desenate cutiile, în funcția `cutii()`.
+3. **Mai greu:** la tabul „3. Coada de comenzi”, adaugă un câmp „Client” care afișează doar comenzile acelui client (filtrare în JavaScript, cu `filter()`).
 
 ## Prezentarea (5 minute de fiecare)
 

@@ -27,7 +27,8 @@
   .hint { color:var(--muted); font-size:14px; margin:0 0 14px; }
   form { display:flex; gap:8px; flex-wrap:wrap; align-items:end; margin-bottom:14px; }
   label { display:flex; flex-direction:column; font-size:13px; color:var(--muted); gap:4px; }
-  input, select { padding:8px 10px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; }
+  h3 { margin:18px 0 4px; font-size:15px; }
+  input, select, textarea { font-family:inherit; padding:8px 10px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; }
   form button { padding:9px 16px; border:0; border-radius:8px; background:var(--accent); color:#fff; cursor:pointer; font-size:14px; }
   .cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:12px; }
   .stat { border:1px solid #e5e7eb; border-radius:10px; padding:12px; }
@@ -48,6 +49,12 @@
   .toggle { display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 8px; }
   .toggle button { border:1px solid #d1d5db; background:#fff; padding:7px 12px; border-radius:8px; cursor:pointer; font-size:14px; }
   .toggle button.active { background:var(--path); border-color:var(--path); font-weight:600; }
+  .boxes { display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; margin:6px 0 16px; }
+  .box { width:46px; height:120px; border:2px solid #92400e; border-top-style:dashed; border-radius:0 0 6px 6px;
+         display:flex; flex-direction:column-reverse; background:#fffbeb; }
+  .box div { background:#f59e0b; border-top:1px solid #fffbeb; color:#451a03; font-size:11px;
+             display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  pre.plan { white-space:pre-wrap; max-height:none; }
   .prio { display:inline-block; min-width:22px; text-align:center; border-radius:6px; padding:1px 6px; font-weight:600; }
   .prio.p1 { background:#fee2e2; color:#b91c1c; } .prio.p2 { background:#fef3c7; color:#92400e; } .prio.p3 { background:#f1f5f9; color:#64748b; }
   .error { color:var(--bad); font-weight:600; }
@@ -62,22 +69,47 @@
 </header>
 
 <nav id="tabs">
-  <button data-tab="cautare" class="active">Cautare produs</button>
-  <button data-tab="coada">Coada de comenzi</button>
-  <button data-tab="drum">Drum in depozit</button>
-  <button data-tab="ruta">Ruta unei comenzi</button>
-  <button data-tab="camion">Camion</button>
+  <button data-tab="cautare" class="active">1. Cautare produs</button>
+  <button data-tab="verificare">2. Coduri lipsa</button>
+  <button data-tab="coada">3. Coada de comenzi</button>
+  <button data-tab="bazadedate">4. Baza de date</button>
+  <button data-tab="cutii">5. Cutii</button>
+  <button data-tab="camion">6. Camion</button>
+  <button data-tab="drum">7. Drum in depozit</button>
+  <button data-tab="ruta">8. Ruta unei comenzi</button>
 </nav>
 
 <main>
   <section id="cautare" class="active">
     <h2>Cautare produs dupa cod (Exercitiul 1)</h2>
-    <p class="hint">Compara numarul de comparatii: secvential vs. binar, in 200.000 de coduri.</p>
+    <p class="hint">Compara numarul de comparatii: cautare pe rand vs. cautare binara, in 200.000 de coduri.</p>
     <form data-action="cautare">
       <label>Cod produs <input name="cod" value="PROD-0791900"></label>
       <button>Cauta</button>
     </form>
     <div class="out"></div>
+  </section>
+
+  <section id="verificare">
+    <h2>Ce coduri nu exista in catalog? (Exercitiul 2)</h2>
+    <p class="hint">Varianta naiva (doua bucle) vs. "dulapul cu sertare" (tabela de dispersie).</p>
+    <div>
+      <form data-action="verificare">
+        <label>Coduri, cate unul pe rand
+          <textarea name="coduri" rows="4" cols="30">PROD-0791900
+PROD-1583800
+PROD-INEXISTENT</textarea></label>
+        <button>Verifica</button>
+      </form>
+      <div class="out"></div>
+    </div>
+    <div>
+      <form data-action="verificareAleatoare">
+        <label>Sau verifica la intamplare <input name="numar" type="number" value="200" min="1" max="1000"></label>
+        <button>Coduri aleatoare</button>
+      </form>
+      <div class="out"></div>
+    </div>
   </section>
 
   <section id="coada">
@@ -86,6 +118,55 @@
     <form data-action="coada">
       <label>Cate comenzi <input name="limita" type="number" value="15" min="1" max="100"></label>
       <button>Afiseaza</button>
+    </form>
+    <div class="out"></div>
+  </section>
+
+  <section id="bazadedate">
+    <h2>Baza de date: index si problema N+1 (Exercitiul 4)</h2>
+    <div>
+      <h3>4a. Cauta un produs direct in MySQL</h3>
+      <p class="hint">Fara index: "Table scan" (MySQL citeste tot tabelul). Cu index: "Index lookup".</p>
+      <form data-action="produs">
+        <label>Cod produs <input name="cod" value="PROD-0791900"></label>
+        <button>Cauta in MySQL</button>
+      </form>
+      <div class="out"></div>
+    </div>
+    <div>
+      <h3>4b. Raportul unui client: cate query-uri SQL?</h3>
+      <p class="hint">Comparam varianta naiva cu varianta cu JOIN.</p>
+      <form data-action="raport">
+        <label>Client
+          <select name="client">
+            <option>Bricolaj Bacau SRL</option><option>Constructii Moldova SA</option><option>Ionescu Ana</option>
+            <option>Instal Siret SRL</option><option>Casa Verde Onesti SRL</option><option>Renovari Rapide SRL</option>
+            <option>Electro Trotus SRL</option><option>Tamplaria Bistrita SRL</option>
+          </select></label>
+        <button>Compara</button>
+      </form>
+      <div class="out"></div>
+    </div>
+  </section>
+
+  <section id="cutii">
+    <h2>In cate cutii incape comanda? (Exercitiul 5)</h2>
+    <p class="hint">Trei reguli lacome. Fiecare dreptunghi este o cutie; inaltimea arata cate kg are in ea. Exemplu bun: CMD-00587.</p>
+    <form data-action="cutii">
+      <label>Comanda <input name="numar" value="CMD-00587"></label>
+      <label>Capacitate cutie (kg) <input name="capacitate" type="number" value="30" min="1"></label>
+      <button>Impacheteaza</button>
+    </form>
+    <div class="out"></div>
+  </section>
+
+  <section id="camion">
+    <h2>Ce incarcam in camion? (Exercitiul 6)</h2>
+    <p class="hint">Metoda lacoma vs. toate combinatiile, pe primele comenzi din coada (maximum 20).</p>
+    <form data-action="camion">
+      <label>Capacitate (kg) <input name="capacitate" type="number" value="800"></label>
+      <label>Comenzi luate in calcul <input name="comenzi" type="number" value="15" max="20"></label>
+      <button>Calculeaza</button>
     </form>
     <div class="out"></div>
   </section>
@@ -110,17 +191,6 @@
     </form>
     <div class="out"></div>
   </section>
-
-  <section id="camion">
-    <h2>Ce incarcam in camion? (Exercitiul 6)</h2>
-    <p class="hint">Metoda lacoma vs. toate combinatiile, pe primele comenzi din coada (maximum 20).</p>
-    <form data-action="camion">
-      <label>Capacitate (kg) <input name="capacitate" type="number" value="800"></label>
-      <label>Comenzi luate in calcul <input name="comenzi" type="number" value="15" max="20"></label>
-      <button>Calculeaza</button>
-    </form>
-    <div class="out"></div>
-  </section>
 </main>
 
 <script>
@@ -133,6 +203,13 @@ function esc(value) {
 async function api(path, params) {
   const url = '/api' + path + '?' + new URLSearchParams(params);
   const response = await fetch(url);
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.eroare || 'Eroare ' + response.status);
+  return data;
+}
+
+async function apiPost(path, body) {
+  const response = await fetch('/api' + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const data = await response.json();
   if (!response.ok) throw new Error(data.eroare || 'Eroare ' + response.status);
   return data;
@@ -208,11 +285,71 @@ const handlers = {
     </div>`;
   },
 
+  async verificare(form) {
+    const coduri = form.coduri.value.split('\n').map(c => c.trim()).filter(c => c !== '');
+    const d = await apiPost('/catalog/verificare', { coduri });
+    return `<div class="cards">
+      ${stat('Coduri care lipsesc', d.cuDispersie.lipsa.length, d.cuDispersie.lipsa.join(', '))}
+      ${stat('Naiv: operatii', d.naiva.operatii.toLocaleString('ro-RO'), d.naiva.timpMs + ' ms')}
+      ${stat('Cu dispersie: operatii', d.cuDispersie.operatii.toLocaleString('ro-RO'), d.cuDispersie.timpMs + ' ms')}
+    </div>`;
+  },
+
+  async verificareAleatoare(form) {
+    const d = await api('/catalog/verificare-aleatoare', { numar: form.numar.value });
+    return `<div class="cards">
+      ${stat('Coduri verificate', d.coduriVerificate, d.cuDispersie.numarLipsa + ' nu exista')}
+      ${stat('Naiv: operatii', d.naiva.operatii.toLocaleString('ro-RO'), d.naiva.timpMs + ' ms')}
+      ${stat('Cu dispersie: operatii', d.cuDispersie.operatii.toLocaleString('ro-RO'), d.cuDispersie.timpMs + ' ms')}
+    </div>`;
+  },
+
   async coada(form) {
     const d = await api('/comenzi/coada', { limita: form.limita.value });
     const rows = d.coada.map((c, i) => `<tr><td>${i + 1}</td><td>${esc(c.numar)}</td><td>${esc(c.client)}</td><td><span class="prio p${c.prioritate}">${c.prioritate}</span></td><td>${esc(c.dataCreare)}</td></tr>`);
     return `<div class="cards">${stat('Comenzi sortate', d.totalComenzi, d.timpMs + ' ms')}</div>
       <table><tr><th>#</th><th>Numar</th><th>Client</th><th>Prioritate</th><th>Data</th></tr>${rows.join('')}</table>`;
+  },
+
+  async produs(form) {
+    const d = await api('/catalog/produs', { cod: form.cod.value });
+    const p = d.produs;
+    return `<div class="cards">
+      ${stat('Produs', p ? p.denumire : 'nu exista', p ? p.cod + ', locatia ' + p.locatie : '')}
+      ${stat('Foloseste index?', d.folosesteIndex ? 'DA' : 'NU', d.folosesteIndex ? 'Index lookup' : 'Table scan: citeste tot tabelul')}
+      ${stat('Timp', d.timpMs + ' ms')}
+    </div>
+    <pre class="plan">${esc(d.cumACautatMySQL.join('\n'))}</pre>`;
+  },
+
+  async raport(form) {
+    const client = form.client.value;
+    const [naiva, join] = await Promise.all([
+      api('/comenzi/raport', { client, metoda: 'naiva' }),
+      api('/comenzi/raport', { client, metoda: 'join' }),
+    ]);
+    return `<div class="cards">
+      ${stat('Comenzi ale clientului', naiva.comenzi)}
+      ${stat('Naiv: query-uri SQL', naiva.queryuriSql.toLocaleString('ro-RO'), naiva.timpMs + ' ms')}
+      ${stat('Cu JOIN: query-uri SQL', join.queryuriSql.toLocaleString('ro-RO'), join.timpMs + ' ms')}
+    </div>`;
+  },
+
+  async cutii(form) {
+    const d = await api('/comenzi/' + encodeURIComponent(form.numar.value) + '/impachetare', { capacitate: form.capacitate.value });
+    // o cutie = un dreptunghi; fiecare bucata ocupa o inaltime proportionala cu greutatea ei
+    const drawBoxes = boxes => `<div class="boxes">${boxes.map(box =>
+      `<div class="box" title="${box.reduce((a, b) => a + b, 0)} kg din ${d.capacitateCutie}">${box.map(kg =>
+        `<div style="height:${(kg / d.capacitateCutie) * 100}%">${kg}</div>`).join('')}</div>`).join('')}</div>`;
+    const rules = [
+      ['cutiaCurenta', 'Cutia curenta (Next Fit)'],
+      ['primaCutieInCareIncape', 'Prima cutie in care incape (First Fit) - 5a'],
+      ['intaiCeleGrele', 'Intai cele grele (First Fit Decreasing) - 5b'],
+    ];
+    const warning = d.primaCutieInCareIncape.numarCutii === 0
+      ? '<p class="error">"Prima cutie in care incape" nu a pus nimic in cutii. Ai rezolvat Exercitiul 5 (BoxPacker.php)?</p>' : '';
+    return `${warning}<div class="cards">${stat('Bucati', d.bucati.length, d.bucati.join(', ') + ' kg')}${stat('Total', d.totalKg + ' kg')}</div>
+      ${rules.map(([key, title]) => `<h3>${title}: ${d[key].numarCutii} cutii</h3>${drawBoxes(d[key].cutii)}`).join('')}`;
   },
 
   async drum(form) {
