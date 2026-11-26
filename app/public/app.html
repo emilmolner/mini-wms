@@ -25,6 +25,9 @@
   section.active { display:block; }
   h2 { margin:0 0 6px; font-size:18px; }
   .hint { color:var(--muted); font-size:14px; margin:0 0 14px; }
+  .explain { background:#f8fafc; border:1px solid #e5e7eb; border-radius:10px; padding:10px 14px; margin:0 0 14px; font-size:14px; }
+  .explain ul { margin:6px 0 0; padding-left:20px; }
+  .explain li { margin:3px 0; }
   form { display:flex; gap:8px; flex-wrap:wrap; align-items:end; margin-bottom:14px; }
   label { display:flex; flex-direction:column; font-size:13px; color:var(--muted); gap:4px; }
   h3 { margin:18px 0 4px; font-size:15px; }
@@ -111,7 +114,7 @@
 <div class="about">
       <p><b>Problema:</b> un client trimite o lista de coduri. Care dintre ele NU exista in catalog? Catalogul = tabela <code>product</code> din MySQL, coloana <code>code</code> (200.000 de coduri). Aplicatia aduce toate codurile intr-un array PHP, iar comparatia o facem noi, in PHP.</p>
       <p><b>Ideea:</b> in loc sa cautam fiecare cod prin tot catalogul (doua bucle una in alta), punem intai catalogul intr-un "dulap cu sertare etichetate" (un array cu chei). Apoi deschidem direct sertarul cu eticheta codului.</p>
-      <p><b>Ce urmaresti:</b> operatiile. Cu 3 coduri, varianta naiva poate fi chiar mai rapida. Cu 200 de coduri, ea face peste 30 de milioane de operatii, iar dulapul doar 200.000.</p>
+      <p><b>Ce urmaresti:</b> comparatiile variantei naive fata de pasii variantei cu dispersie. Cu 3 coduri, varianta naiva poate fi chiar mai rapida (dulapul costa 200.000 de pasi ca sa-l umplem). Cu 200 de coduri, varianta naiva face peste 30 de milioane de comparatii, iar dulapul ramane la circa 200.000 de pasi.</p>
       <p class="meta">Codul tau: <code>app/src/Algorithm/Hash/MissingCodeFinder.php</code> · In engleza: <i>Hash Table, O(n + m) fata de Nested Loops, O(n &middot; m)</i></p>
     </div>
     <div>
@@ -278,6 +281,24 @@ function stat(title, value, note = '') {
   return `<div class="stat"><small>${esc(title)}</small><b>${esc(value)}</b><small>${esc(note)}</small></div>`;
 }
 
+// Chenarul "Ce inseamna cifrele": [titlu, explicatie] pentru fiecare cifra de mai sus (explicatia poate contine HTML scris de noi)
+function explain(rows) {
+  return `<div class="explain"><b>Ce inseamna cifrele</b><ul>${rows.map(([title, text]) => `<li><b>${esc(title)}</b>: ${text}</li>`).join('')}</ul></div>`;
+}
+// Exercitiul 2: de unde vin cifrele "comparatii" si "pasi"
+function explainMissing(d) {
+  const nr = v => v.toLocaleString('ro-RO');
+  const fast = d.cuDispersie.operatii === 0
+    ? 'inca 0: metoda <code>findMissingFast()</code> nu e scrisa (Exercitiul 2).'
+    : `${nr(d.produseInCatalog)} coduri din catalog puse in "dulap" (<code>$index[$code] = true</code>) + ${nr(d.coduriVerificate)} coduri cerute cautate in dulap (<code>isset()</code>) = ${nr(d.produseInCatalog + d.coduriVerificate)}. Dulapul se umple o singura data, oricate coduri ar cere clientul.`;
+  return explain([
+    ['Naiv: comparatii', `de cate ori am comparat un cod cerut cu un cod din catalog (<code>$existing === $code</code>). Fiecare cod cerut se cauta prin catalog de la inceput; unul care lipseste costa tot catalogul, adica ${nr(d.produseInCatalog)} de comparatii.`],
+    ['Cu dispersie: pasi', fast],
+    MS_NOTE,
+  ]);
+}
+const MS_NOTE =['ms', 'timpul masurat pe calculatorul tau. Difera putin de la o rulare la alta; numarul de pasi ramane acelasi.'];
+
 // Fisa comenzii: clientul, prioritatea, data si tabelul cu produsele (cantitate, greutate, locatie)
 function orderCard(o) {
   const totalPieces = o.produse.reduce((sum, p) => sum + p.cantitate, 0);
@@ -355,7 +376,12 @@ const handlers = {
       ${stat('Gasit?', bin.gasit ? 'DA, pozitia ' + bin.pozitie : 'NU')}
       ${stat('Comparatii secvential', sec.comparatii.toLocaleString('ro-RO'), sec.timpMs + ' ms')}
       ${stat('Comparatii binar', bin.comparatii, bin.timpMs + ' ms')}
-    </div>`;
+    </div>
+    ${explain([
+      ['Comparatii secvential', 'de cate ori am comparat codul cautat cu un cod din lista, luand codurile pe rand, de la primul. Un cod care nu exista costa tot catalogul (200.000).'],
+      ['Comparatii binar', 'de cate ori ne-am uitat la codul din mijlocul bucatii ramase. Dupa fiecare comparatie, jumatate din lista dispare, asa ca ajung in jur de 18 (2<sup>18</sup> &asymp; 262.000).'],
+      MS_NOTE,
+    ])}`;
   },
 
   async verificare(form) {
@@ -363,18 +389,20 @@ const handlers = {
     const d = await apiPost('/catalog/verificare', { coduri });
     return `<div class="cards">
       ${stat('Coduri care lipsesc', d.cuDispersie.lipsa.length, d.cuDispersie.lipsa.join(', '))}
-      ${stat('Naiv: operatii', d.naiva.operatii.toLocaleString('ro-RO'), d.naiva.timpMs + ' ms')}
-      ${stat('Cu dispersie: operatii', d.cuDispersie.operatii.toLocaleString('ro-RO'), d.cuDispersie.timpMs + ' ms')}
-    </div>`;
+      ${stat('Naiv: comparatii', d.naiva.operatii.toLocaleString('ro-RO'), d.naiva.timpMs + ' ms')}
+      ${stat('Cu dispersie: pasi', d.cuDispersie.operatii.toLocaleString('ro-RO'), d.cuDispersie.timpMs + ' ms')}
+    </div>
+    ${explainMissing(d)}`;
   },
 
   async verificareAleatoare(form) {
     const d = await api('/catalog/verificare-aleatoare', { numar: form.numar.value });
     return `<div class="cards">
       ${stat('Coduri verificate', d.coduriVerificate, d.cuDispersie.numarLipsa + ' nu exista')}
-      ${stat('Naiv: operatii', d.naiva.operatii.toLocaleString('ro-RO'), d.naiva.timpMs + ' ms')}
-      ${stat('Cu dispersie: operatii', d.cuDispersie.operatii.toLocaleString('ro-RO'), d.cuDispersie.timpMs + ' ms')}
-    </div>`;
+      ${stat('Naiv: comparatii', d.naiva.operatii.toLocaleString('ro-RO'), d.naiva.timpMs + ' ms')}
+      ${stat('Cu dispersie: pasi', d.cuDispersie.operatii.toLocaleString('ro-RO'), d.cuDispersie.timpMs + ' ms')}
+    </div>
+    ${explainMissing(d)}`;
   },
 
   async coada(form) {
@@ -495,7 +523,11 @@ const handlers = {
       html: `${warning}<div class="cards">
         ${stat('Pasi', d.pasi ?? '-')}
         ${stat('Celule verificate', d.celuleVerificate)}
-      </div>${drawMap(d.harta, { [target]: '' })}`,
+      </div>
+      ${explain([
+        ['Pasi', 'lungimea drumului galben: din cate celule in cate celule s-a mutat omul, de la S pana la raft.'],
+        ['Celule verificate', 'cate celule a scos BFS din coada si s-a uitat la vecinii lor, pana a ajuns la raft. Sunt mai multe decat pasii, pentru ca "valul" se intinde in toate directiile deodata.'],
+      ])}${drawMap(d.harta, { [target]: '' })}`,
       after: out => animatePath(out.querySelector('.grid'), d.drum),
     };
   },
@@ -510,6 +542,11 @@ const handlers = {
         ${stat('Toate variantele (optim)', routes.best.pasi + ' pasi', routes.best.timpMs + ' ms')}
         ${stat('Rute verificate', routes.best.ruteVerificate.toLocaleString('ro-RO'))}
       </div>
+      ${explain([
+        ['Pasi', 'cate celule merge omul in total: de la rampa (S), pe la toate rafturile, si inapoi la rampa.'],
+        ['Rute verificate', `cate ordini complete de vizitare a rafturilor a incercat metoda "toate variantele". Cu ${d.locatii.length - 1} rafturi sunt ${d.locatii.length - 1}! (factorial) ordini. Metoda lacoma incearca una singura.`],
+        MS_NOTE,
+      ])}
       <div class="toggle">
         <button data-route="nn">Cel mai apropiat vecin (${routes.nn.pasi} pasi)</button>
         <button data-route="best">Toate variantele (${routes.best.pasi} pasi)</button>
@@ -543,6 +580,11 @@ const handlers = {
       ${stat('Toate combinatiile', lei(d.toateCombinatiile.valoare), d.toateCombinatiile.greutate + ' kg, ' + d.toateCombinatiile.varianteVerificate.toLocaleString('ro-RO') + ' variante verificate')}
       ${stat('Diferenta', lei(d.toateCombinatiile.valoare - d.metodaLacoma.valoare))}
     </div>
+    ${explain([
+      ['Metoda lacoma / Toate combinatiile', 'cati lei valoreaza comenzile puse in camion; dedesubt, greutatea lor totala (nu are voie sa treaca de capacitate).'],
+      ['Variante verificate', `cate incarcari complete a incercat "toate combinatiile": pentru fiecare comanda, "o iau" sau "nu o iau". Cu ${d.comenziDinCoada.length} comenzi sunt pana la 2<sup>${d.comenziDinCoada.length}</sup> = ${(2 ** d.comenziDinCoada.length).toLocaleString('ro-RO')} variante (cele care depasesc capacitatea sunt abandonate pe drum, de aceea pot fi mai putine).`],
+      ['Diferenta', 'cati lei pierde metoda lacoma fata de cea mai buna incarcare posibila.'],
+    ])}
     <table><tr><th>Comanda</th><th>Greutate</th><th>Valoare</th><th>Lacoma</th><th>Toate combinatiile</th></tr>
       ${d.comenziDinCoada.map(c => `<tr><td>${esc(c.nume)}</td><td>${c.greutate} kg</td><td>${lei(c.valoare)}</td>
         <td>${d.metodaLacoma.alese.includes(c.nume) ? '✔' : ''}</td><td>${d.toateCombinatiile.alese.includes(c.nume) ? '✔' : ''}</td></tr>`).join('')}
