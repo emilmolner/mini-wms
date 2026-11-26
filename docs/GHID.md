@@ -23,6 +23,7 @@
   - [Exercițiul 6: Încărcarea camionului](#exercițiul-6-încărcarea-camionului)
   - [Exercițiul 7: Drumul cel mai scurt](#exercițiul-7-drumul-cel-mai-scurt)
   - [Exercițiul 8: Ruta de colectare](#exercițiul-8-ruta-de-colectare)
+- [Provocări deschise (pentru curioși)](#provocări-deschise)
 - [Întâlnirea 3: Interfața web și prezentarea](#întâlnirea-3)
 - [Anexe: probleme frecvente, comenzi, cuvinte noi, dicționar român–englez](#anexe)
 
@@ -67,6 +68,8 @@ La fiecare exercițiu pornim de la o **problemă reală** din depozit („care c
 | 5:45 | Recapitulare | | | | |
 
 Programul e orientativ. Dacă un exercițiu durează mai mult, nu e nicio problemă.
+
+La începutul întâlnirilor 2 și 3 avem 10–15 minute pentru [provocările deschise](#provocări-deschise): cine a găsit ceva, ne povestește.
 
 ---
 
@@ -691,6 +694,74 @@ Toate testele trebuie să fie acum verzi:
 ```bash
 docker exec wms-php php bin/phpunit --testdox
 ```
+
+---
+
+<a id="provocări-deschise"></a>
+# Provocări deschise (pentru curioși)
+
+Exercițiile de până acum au un răspuns corect, pe care testele îl verifică. Întrebările de aici **nu au un singur răspuns bun**. Seamănă cu ce primești la serviciu: o problemă reală, puțin neclară, pe care trebuie s-o gândești tu.
+
+**Regulile:**
+
+- Sunt **opționale**. Alegi una sau mai multe, care îți plac.
+- Răspunsul poate fi **câteva rânduri scrise** (ce ai observat, ce ai propune și de ce), **o schiță pe hârtie** sau **cod** pe o ramură separată:
+
+  ```bash
+  git checkout -b provocare-3
+  # ... modificarile tale ...
+  git commit -am "Provocarea 3: comenzile vechi urca in coada"
+  ```
+
+- Nu contează să fie perfect. Contează să **observi** ceva, să **încerci** și să poți **explica** ce ai făcut.
+- Le discutăm la începutul întâlnirii următoare.
+
+Dificultatea: ⭐ te gândești 10 minute, ⭐⭐ încerci ceva în cod, ⭐⭐⭐ citești ceva nou și scrii cod mai mult.
+
+### Întâlnirea 1
+
+**Provocarea 1. Literele mici (Exercițiile 1 și 2)** ⭐
+În tabul „1. Căutare produs” caută `prod-0791900`, cu litere mici. Apoi pune același cod în tabul „2. Coduri lipsă”. Ce observi? De ce se întâmplă asta? Unde ai repara, și de ce acolo? Mai găsești și alte feluri în care un client poate scrie „greșit” un cod corect?
+
+**Provocarea 2. Produse noi în fiecare zi (Exercițiul 1)** ⭐⭐
+Căutarea binară merge doar pe o listă sortată. În depozit intră zilnic 50 de produse noi. Sortăm din nou toate cele 200.000 de coduri la fiecare produs nou? Ce alte variante ai? Cât costă fiecare (aproximativ, în comparații sau mutări)?
+
+**Provocarea 3. Comanda uitată (Exercițiul 3)** ⭐⭐
+Dacă în fiecare zi vin multe comenzi urgente, o comandă cu prioritatea 3 poate aștepta la nesfârșit. Clientul ei sună supărat după o săptămână. Cum ai schimba regula din `OrderComparator`, astfel încât nicio comandă să nu aștepte prea mult? Cât înseamnă „prea mult” și cine ar trebui să decidă asta?
+
+**Provocarea 4. Cine apără regula? (Exercițiul 3)** ⭐
+Prioritatea are voie să fie doar 1, 2 sau 3. Caută în proiect: unde e scrisă regula asta? Ce se întâmplă dacă cineva pune direct în baza de date `priority = 0` sau `priority = 7`? Cum ai împiedica asta? Găsește cel puțin două locuri în care s-ar putea pune regula și spune ce avantaj are fiecare.
+
+**Provocarea 5. Încă un index? (Exercițiul 4)** ⭐⭐
+Vrem comenzile clientului 1, de la cea mai veche la cea mai nouă:
+
+```sql
+EXPLAIN SELECT number, created_at FROM orders WHERE customer_id = 1 ORDER BY created_at;
+```
+
+Rulează query-ul (de exemplu cu `docker exec -it wms-mysql mysql -uwms -pwms wms`) și uită-te la coloanele `key` și `Extra`. MySQL folosește deja un index pe `customer_id`, deși noi n-am cerut așa ceva. De unde vine? Ce înseamnă `Using filesort`? Ar ajuta un index pe două coloane? Contează ordinea coloanelor în index?
+
+### Întâlnirea 2
+
+**Provocarea 6. Cutii adevărate (Exercițiul 5)** ⭐⭐
+Am împachetat doar după greutate. O cutie are însă și un volum, iar unele produse nu au voie împreună (becurile nu stau sub gresie). Ce date ar trebui să mai avem despre produse? Cum s-ar schimba regula „întâi cele grele”?
+
+**Provocarea 7. Camionul mai mare (Exercițiul 6)** ⭐⭐⭐
+„Toate combinațiile” nu mai merge la 200 de comenzi: 2²⁰⁰ variante. Există totuși o metodă care găsește răspunsul cel mai bun destul de repede, când greutățile sunt numere întregi mici. Caută „0/1 knapsack dynamic programming” (în română: *programare dinamică*). Explică ideea cu un tabel mic, de exemplu 4 comenzi și un camion de 10 kg. Bonus: scrie-o în `TruckLoader` și compară cu rezultatul de la 15 comenzi.
+
+**Provocarea 8. Nu toți pașii sunt egali (Exercițiul 7)** ⭐⭐⭐
+Am numărat fiecare pas la fel. În realitate, o celulă cu marfă pe jos se trece mai greu, iar un culoar aglomerat e mai lent. Ce se întâmplă cu BFS dacă un pas poate costa 1 sau 3? Mai găsește drumul cel mai scurt? Caută „algoritmul lui Dijkstra” și explică diferența față de BFS.
+
+**Provocarea 9. Îmbunătățește ruta lacomă (Exercițiul 8)** ⭐⭐⭐
+La `CMD-00017`, metoda lacomă face 70 de pași, iar cea mai bună rută 64. Poți îmbunătăți ruta lacomă **fără** să încerci toate variantele? Idee: ia două opriri din rută și inversează bucata dintre ele; dacă ruta iese mai scurtă, păstreaz-o; repetă cât timp mai găsești îmbunătățiri. (În engleză: *2-opt*.) La câți pași ajungi?
+
+### Oricând
+
+**Provocarea 10. Ochi de tester** ⭐
+Găsește în proiect ceva care nu merge, un rezultat ciudat sau un text neclar (în cod, în pagina web, în acest ghid). Scrie cum ai găsit problema și ce ai schimba. La serviciu, un raport de bug bun valorează mult.
+
+**Provocarea 11. În afara depozitului** ⭐
+Alege un algoritm din curs. Unde l-ai mai folosi, în afară de un depozit? (o aplicație de livrări, un joc, orarul facultății, …) Ce ar fi „produsele”, „comenzile” sau „rafturile” acolo?
 
 ---
 
