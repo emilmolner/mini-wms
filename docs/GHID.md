@@ -149,7 +149,7 @@ mini-wms/
     ├── src/
     │   ├── Algorithm/            ★ AICI LUCRĂM: algoritmii
     │   ├── Controller/           rutele API (gata făcute)
-    │   ├── Entity/               tabelele: Product, Order, OrderLine, Location
+    │   ├── Entity/               tabelele: Product, Customer, Order, OrderLine, Location
     │   ├── Repository/           interogările spre baza de date
     │   ├── Command/              comenzi de terminal
     │   └── Warehouse/            harta depozitului
@@ -460,7 +460,7 @@ Algoritmii nu trăiesc doar în codul PHP. Și baza de date folosește aceleași
 
 ### 4b. Problema N+1: drumul la magazin
 
-**Problema.** Vrem raportul cu **toate comenzile** clientului `Bricolaj Bacău SRL` și produsele din ele. Încearcă `GET /api/comenzi/raport?metoda=naiva`:
+**Problema.** Vrem raportul cu **toate comenzile** clientului `Bricolaj Bacău SRL` și produsele din ele. Clientul are id-ul **1** (lista clienților, cu id-urile lor: `GET /api/clienti`). Încearcă `GET /api/comenzi/raport?client=1&metoda=naiva`:
 
 ```json
 { "comenzi": 373, "queryuriSql": 1671, "timpMs": 228 }
@@ -478,7 +478,7 @@ Algoritmii nu trăiesc doar în codul PHP. Și baza de date folosește aceleași
 
 **Ce ai de făcut.** Deschide `app/src/Repository/OrderRepository.php`, metoda `findByCustomerWithJoin()`, și adaugă cele două JOIN-uri descrise în comentariu.
 
-**Cum verifici:** `GET /api/comenzi/raport?metoda=join` trebuie să arate `"queryuriSql": 1` și un timp mult mai mic.
+**Cum verifici:** `GET /api/comenzi/raport?client=1&metoda=join` trebuie să arate `"queryuriSql": 1` și un timp mult mai mic.
 
 **Întrebări:**
 1. De ce se numește „N+1”?
@@ -488,7 +488,7 @@ Algoritmii nu trăiesc doar în codul PHP. Și baza de date folosește aceleași
 
 Symfony ține minte, în modul de dezvoltare, tot ce s-a întâmplat la fiecare cerere: timpul, memoria, erorile și **fiecare query SQL**. Unealta se numește **Symfony Profiler** (*Web Profiler*) și o folosim zilnic la serviciu ca să găsim probleme ca N+1.
 
-1. Fă o cerere, de exemplu `GET /api/comenzi/raport?metoda=naiva` din Swagger, sau apasă „Compară” în tabul „4. Baza de date” din pagina web.
+1. Fă o cerere, de exemplu `GET /api/comenzi/raport?client=1&metoda=naiva` din Swagger, sau apasă „Compară” în tabul „4. Baza de date” din pagina web.
 2. Deschide **http://localhost:8000/_profiler**. Vezi ultimele cereri; alege-o pe cea cu `/api/comenzi/raport`. Din pagina web ajungi direct acolo, cu linkul 🔎 de lângă rezultat.
 3. În stânga, alege **Doctrine**. Vezi câte query-uri s-au trimis și cât au durat.
 4. Tabul **Grouped Statements** (deschis implicit) adună cele 1.671 de query-uri în 3 rânduri, cu coloana **Count** (de câte ori s-a trimis fiecare), la fel ca în pagina noastră. Cu **Show all queries** le vezi pe toate, unul câte unul.
@@ -774,7 +774,7 @@ docker exec -it wms-mysql mysql -uwms -pwms wms
 În MySQL poți încerca, de exemplu:
 
 ```sql
-SELECT customer, COUNT(*) FROM orders GROUP BY customer;
+SELECT c.name, COUNT(*) FROM orders o JOIN customer c ON c.id = o.customer_id GROUP BY c.name;
 EXPLAIN ANALYZE SELECT * FROM product WHERE code = 'PROD-0791900';
 ```
 

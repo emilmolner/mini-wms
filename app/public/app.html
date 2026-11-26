@@ -168,14 +168,11 @@ PROD-INEXISTENT</textarea></label>
     </div>
     <div>
       <h3>4b. Raportul unui client: cate query-uri SQL?</h3>
-      <p class="hint">Varianta naiva trimite un query pentru comenzi, apoi cate unul pentru fiecare comanda si fiecare produs. Cu JOIN: unul singur.</p>
+      <p class="hint">Varianta naiva trimite un query pentru comenzi, apoi cate unul pentru fiecare comanda si fiecare produs. Cu JOIN: unul singur.
+        Clientul se trimite prin id-ul lui (<code>?client=1</code>); lista vine din <code>GET /api/clienti</code>.</p>
       <form data-action="raport">
         <label>Client
-          <select name="client">
-            <option>Bricolaj Bacau SRL</option><option>Constructii Moldova SA</option><option>Ionescu Ana</option>
-            <option>Instal Siret SRL</option><option>Casa Verde Onesti SRL</option><option>Renovari Rapide SRL</option>
-            <option>Electro Trotus SRL</option><option>Tamplaria Bistrita SRL</option>
-          </select></label>
+          <select name="client" id="clienti"><option value="1">Se incarca...</option></select></label>
         <button>Compara</button>
       </form>
       <div class="out"></div>
@@ -452,7 +449,7 @@ const handlers = {
     </table>`;
 
     return `<div class="cards">
-      ${stat('Comenzi ale clientului', naiva.comenzi)}
+      ${stat('Comenzi ale clientului', naiva.comenzi, naiva.client.nume + ' (id ' + naiva.client.id + ')')}
       ${stat('Naiv: query-uri SQL', naiva.queryuriSql.toLocaleString('ro-RO'), naiva.timpMs + ' ms')}
       ${stat('Cu JOIN: query-uri SQL', join.queryuriSql.toLocaleString('ro-RO'), join.timpMs + ' ms')}
     </div>
@@ -569,6 +566,12 @@ document.querySelectorAll('form[data-action]').forEach(form => {
     }
   });
 });
+
+// Lista clientilor vine din API (GET /api/clienti); la raport trimitem doar id-ul clientului
+api('/clienti', {}).then(clients => {
+  document.getElementById('clienti').innerHTML = clients
+    .map(c => `<option value="${c.id}">${c.id}. ${esc(c.nume)} (${c.comenzi} comenzi)</option>`).join('');
+}).catch(() => {});
 
 document.getElementById('tabs').addEventListener('click', event => {
   const tab = event.target.dataset.tab;

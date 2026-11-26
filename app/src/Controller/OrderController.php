@@ -34,9 +34,10 @@ final class OrderController extends AbstractController
     {
         // comenzile vin din baza de date in ordinea in care au fost introduse; sortarea o facem NOI, in PHP
         $orders = $this->db->fetchAllAssociative(
-            "SELECT number AS numar, customer AS client, priority AS prioritate,
-                    DATE_FORMAT(created_at, '%Y-%m-%d %H:%i:%s') AS dataCreare
-             FROM orders ORDER BY id",
+            "SELECT o.number AS numar, c.name AS client, o.priority AS prioritate,
+                    DATE_FORMAT(o.created_at, '%Y-%m-%d %H:%i:%s') AS dataCreare
+             FROM orders o JOIN customer c ON c.id = o.customer_id
+             ORDER BY o.id",
         );
         foreach ($orders as &$order) {
             $order['prioritate'] = (int) $order['prioritate'];
@@ -56,18 +57,23 @@ final class OrderController extends AbstractController
 
     /** EXERCITIUL 4b: toate comenzile unui client, cu produsele lor. Cate query-uri SQL se trimit la MySQL? */
     #[Route('/raport', methods: ['GET'])]
-    #[OA\Parameter(name: 'client', in: 'query', schema: new OA\Schema(type: 'string', default: 'Bricolaj Bacau SRL'))]
+    #[OA\Parameter(name: 'client', in: 'query', description: 'id-ul clientului (lista: GET /api/clienti)', schema: new OA\Schema(type: 'integer', default: 1))]
     #[OA\Parameter(name: 'metoda', in: 'query', schema: new OA\Schema(type: 'string', enum: ['naiva', 'join'], default: 'naiva'))]
     public function report(
         OrderRepository $repository,
         #[Autowire(service: 'doctrine.debug_data_holder')] DebugDataHolder $sqlLog,
-        #[MapQueryParameter] string $client = 'Bricolaj Bacau SRL',
+        #[MapQueryParameter(name: 'client')] int $customerId = 1,
         #[MapQueryParameter(name: 'metoda')] string $method = 'naiva',
     ): JsonResponse {
+        $customerName = $this->db->fetchOne('SELECT name FROM customer WHERE id = :id', ['id' => $customerId]);
+        if (false === $customerName) {
+            throw new NotFoundHttpException("Clientul cu id-ul $customerId nu exista. Lista clientilor: GET /api/clienti");
+        }
+
         $sqlLog->reset(); // Symfony tine minte (in modul dev) fiecare query trimis; incepem numaratoarea de la 0
         $start = hrtime(true);
 
-        $orders = 'join' === $method ? $repository->findByCustomerWithJoin($client) : $repository->findByCustomerNaive($client);
+        $orders = 'join' === $method ? $repository->findByCustomerWithJoin($customerId) : $repository->findByCustomerNaive($customerId);
 
         $report = [];
         foreach ($orders as $order) {
@@ -90,7 +96,7 @@ final class OrderController extends AbstractController
         }
 
         return $this->json([
-            'client' => $client,
+            'client' => ['id' => $customerId, 'nume' => $customerName],
             'metoda' => $method,
             'comenzi' => \count($report),
             'queryuriSql' => \count($queries),
@@ -230,8 +236,9 @@ final class OrderController extends AbstractController
     private function orderDetails(string $number, array $lines): array
     {
         $order = $this->db->fetchAssociative(
-            "SELECT customer AS client, priority AS prioritate, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') AS dataCreare
-             FROM orders WHERE number = :number",
+            "SELECT c.name AS client, o.priority AS prioritate, DATE_FORMAT(o.created_at, '%Y-%m-%d %H:%i') AS dataCreare
+             FROM orders o JOIN customer c ON c.id = o.customer_id
+             WHERE o.number = :number",
             ['number' => strtoupper($number)],
         );
 

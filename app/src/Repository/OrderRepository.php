@@ -15,14 +15,14 @@ class OrderRepository extends ServiceEntityRepository
     }
 
     /**
-     * GATA FACUT - varianta naiva: aduce doar comenzile clientului.
+     * GATA FACUT - varianta naiva: aduce doar comenzile clientului (dupa customer_id).
      * Liniile si produsele lor se incarca abia cand le folosim, cate un query pentru fiecare.
      *
      * @return list<Order>
      */
-    public function findByCustomerNaive(string $customer): array
+    public function findByCustomerNaive(int $customerId): array
     {
-        return $this->findBy(['customer' => $customer], ['id' => 'ASC']);
+        return $this->findBy(['customer' => $customerId], ['id' => 'ASC']);
     }
 
     /**
@@ -32,11 +32,11 @@ class OrderRepository extends ServiceEntityRepository
      *
      * @return list<Order>
      */
-    public function findByCustomerWithJoin(string $customer): array
+    public function findByCustomerWithJoin(int $customerId): array
     {
         // TODO EXERCITIUL 4b: adauga cele doua JOIN-uri (cu addSelect, ca Doctrine sa si incarce datele):
         //     ->leftJoin('o.lines', 'l')->addSelect('l')
         //     ->leftJoin('l.product', 'p')->addSelect('p')
-        return $this->createQueryBuilder('o')->where('o.customer = :customer')->setParameter('customer', $customer)->orderBy('o.id', 'ASC')->getQuery()->getResult();
+        return $this->createQueryBuilder('o')->where('o.customer = :customer')->setParameter('customer', $customerId)->orderBy('o.id', 'ASC')->getQuery()->getResult();
     }
 }

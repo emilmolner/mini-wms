@@ -8,7 +8,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
- * Umple baza de date cu date de test: locatiile din harta, 200.000 de produse, 3.000 de comenzi.
+ * Umple baza de date cu date de test: locatiile din harta, 200.000 de produse, 8 clienti, 3.000 de comenzi.
  *
  * Valorile "la intamplare" sunt calculate cu CRC32 (o functie care transforma un text intr-un numar),
  * deci sunt ACELEASI la toata lumea: comanda CMD-00017 arata la fel pe toate calculatoarele.
@@ -28,7 +28,7 @@ final class SeedCommand
         $start = microtime(true);
 
         $this->db->executeStatement('SET FOREIGN_KEY_CHECKS = 0');
-        foreach (['order_line', 'orders', 'product', 'location'] as $table) {
+        foreach (['order_line', 'orders', 'customer', 'product', 'location'] as $table) {
             $this->db->executeStatement("TRUNCATE TABLE $table");
         }
         $this->db->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
@@ -59,21 +59,28 @@ final class SeedCommand
             SQL, ['products' => self::PRODUCTS, 'locations' => $locations]);
         $io->writeln('Produse: '.self::PRODUCTS);
 
-        // 3. comenzile, din ultimele 10 zile
+        // 3. clientii (id-urile 1..8, in ordinea de mai jos)
+        $customers = ['Bricolaj Bacau SRL', 'Constructii Moldova SA', 'Ionescu Ana', 'Instal Siret SRL',
+            'Casa Verde Onesti SRL', 'Renovari Rapide SRL', 'Electro Trotus SRL', 'Tamplaria Bistrita SRL'];
+        foreach ($customers as $name) {
+            $this->db->insert('customer', ['name' => $name]);
+        }
+        $io->writeln('Clienti: '.\count($customers));
+
+        // 4. comenzile, din ultimele 10 zile
         $this->db->executeStatement(<<<'SQL'
-            INSERT INTO orders (number, customer, priority, created_at)
+            INSERT INTO orders (number, customer_id, priority, created_at)
             WITH RECURSIVE seq (i) AS (SELECT 1 UNION ALL SELECT i + 1 FROM seq WHERE i < :orders)
             SELECT
                 CONCAT('CMD-', LPAD(i, 5, '0')),
-                ELT(1 + CRC32(CONCAT('client', i)) % 8, 'Bricolaj Bacau SRL', 'Constructii Moldova SA', 'Ionescu Ana',
-                    'Instal Siret SRL', 'Casa Verde Onesti SRL', 'Renovari Rapide SRL', 'Electro Trotus SRL', 'Tamplaria Bistrita SRL'),
+                1 + CRC32(CONCAT('client', i)) % 8,
                 1 + CRC32(CONCAT('prioritate', i)) % 3,
                 TIMESTAMP('2026-11-27 08:00:00') - INTERVAL (CRC32(CONCAT('data', i)) % 14400) MINUTE
             FROM seq
             SQL, ['orders' => self::ORDERS]);
         $io->writeln('Comenzi: '.self::ORDERS);
 
-        // 4. liniile: comanda cu id-ul i are 1 + (i % 6) produse
+        // 5. liniile: comanda cu id-ul i are 1 + (i % 6) produse
         $this->db->executeStatement(<<<'SQL'
             INSERT INTO order_line (order_id, product_id, quantity)
             WITH RECURSIVE g (k) AS (SELECT 1 UNION ALL SELECT k + 1 FROM g WHERE k < 6)

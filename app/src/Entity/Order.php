@@ -23,8 +23,10 @@ class Order
     #[ORM\Column(length: 20, unique: true)]
     private string $number;
 
-    #[ORM\Column(length: 80)]
-    private string $customer;
+    /** clientul comenzii; in tabela "orders" se salveaza doar id-ul lui, in coloana customer_id */
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private Customer $customer;
 
     #[ORM\Column]
     private int $priority;
@@ -43,7 +45,7 @@ class Order
 
     public function getId(): ?int { return $this->id; }
     public function getNumber(): string { return $this->number; }
-    public function getCustomer(): string { return $this->customer; }
+    public function getCustomer(): Customer { return $this->customer; }
     public function getPriority(): int { return $this->priority; }
     public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
 

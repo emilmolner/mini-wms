@@ -25,11 +25,14 @@ GET {{api}}/comenzi/coada?limita=10
 ### Exercitiul 4a - cautare direct in MySQL (cu sau fara index?)
 GET {{api}}/catalog/produs?cod=PROD-0791900
 
-### Exercitiul 4b - raportul unui client: varianta naiva
-GET {{api}}/comenzi/raport?client=Bricolaj%20Bacau%20SRL&metoda=naiva
+### Lista clientilor (id-ul fiecaruia)
+GET {{api}}/clienti
+
+### Exercitiul 4b - raportul unui client (dupa id): varianta naiva
+GET {{api}}/comenzi/raport?client=1&metoda=naiva
 
 ### Exercitiul 4b - acelasi raport, cu JOIN
-GET {{api}}/comenzi/raport?client=Bricolaj%20Bacau%20SRL&metoda=join
+GET {{api}}/comenzi/raport?client=1&metoda=join
 
 ### Exercitiul 5 - in cate cutii incape comanda?
 GET {{api}}/comenzi/CMD-00587/impachetare?capacitate=30
