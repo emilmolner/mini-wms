@@ -330,6 +330,8 @@ A doua comandă caută un cod care nu există în liste tot mai mari și afișea
 
 **Problema.** Un client trimite o listă cu 200 de coduri. Vrem să-i spunem care dintre ele **nu există** în catalog.
 
+**Ce e „catalogul”.** Tabela `product` din MySQL, coloana `code`: 200.000 de coduri. Controllerul le aduce pe toate într-un array PHP (`SELECT code FROM product`, în `ProductRepository::allCodesSorted()`), iar comparația o facem noi, în PHP. Așa scriem și înțelegem algoritmul; în producție am lăsa MySQL să facă asta (vezi întrebarea 3).
+
 **Varianta simplă (gata făcută).** Pentru fiecare cod cerut, căutăm pe rând în tot catalogul: 200 × 200.000 = până la **40 de milioane** de comparații.
 
 **Ideea deșteaptă: un dulap cu sertare etichetate.** Pregătim întâi un dulap în care fiecare produs are sertarul lui, cu codul scris pe etichetă. După aceea, ca să afli dacă un cod există, **deschizi direct sertarul** cu eticheta lui. Nu te mai uiți prin celelalte.
@@ -367,6 +369,13 @@ Apoi `GET /api/catalog/verificare-aleatoare?numar=200`:
 1. Încearcă `POST /api/catalog/verificare` cu doar 2 coduri. Care variantă e mai rapidă acum? De ce?
    (Indiciu: cât durează să etichetezi 200.000 de sertare?)
 2. Unde ai mai văzut „dicționare” în viața de zi cu zi?
+3. La serviciu, aceeași verificare s-ar face direct în baza de date:
+
+   ```sql
+   SELECT code FROM product WHERE code IN ('PROD-0791900', 'PROD-INEXISTENT');
+   ```
+
+   Codurile trimise care nu apar în rezultat sunt cele lipsă. De ce e mai bine așa decât să aduci 200.000 de coduri în PHP? Ce o face rapidă? (Indiciu: Exercițiul 4a.)
 
 ---
 

@@ -102,7 +102,7 @@
   <section id="verificare">
     <h2>Ce coduri nu exista in catalog? (Exercitiul 2)</h2>
 <div class="about">
-      <p><b>Problema:</b> un client trimite o lista de coduri. Care dintre ele NU exista in catalog?</p>
+      <p><b>Problema:</b> un client trimite o lista de coduri. Care dintre ele NU exista in catalog? Catalogul = tabela <code>product</code> din MySQL, coloana <code>code</code> (200.000 de coduri). Aplicatia aduce toate codurile intr-un array PHP, iar comparatia o facem noi, in PHP.</p>
       <p><b>Ideea:</b> in loc sa cautam fiecare cod prin tot catalogul (doua bucle una in alta), punem intai catalogul intr-un "dulap cu sertare etichetate" (un array cu chei). Apoi deschidem direct sertarul cu eticheta codului.</p>
       <p><b>Ce urmaresti:</b> operatiile. Cu 3 coduri, varianta naiva poate fi chiar mai rapida. Cu 200 de coduri, ea face peste 30 de milioane de operatii, iar dulapul doar 200.000.</p>
       <p class="meta">Codul tau: <code>app/src/Algorithm/Hash/MissingCodeFinder.php</code> · In engleza: <i>Hash Table, O(n + m) fata de Nested Loops, O(n &middot; m)</i></p>

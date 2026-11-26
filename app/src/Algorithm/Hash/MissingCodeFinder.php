@@ -5,6 +5,9 @@ namespace App\Algorithm\Hash;
 /**
  * EXERCITIUL 2: un client trimite o lista de coduri. Care dintre ele NU exista in catalog?
  *
+ * Catalogul = toate codurile din tabela "product" (coloana "code"), aduse din MySQL intr-un array PHP
+ * de ProductRepository::allCodesSorted(). Comparatia o facem noi, aici, in PHP.
+ *
  * In engleza: Hash Table / Hash Map (in PHP: associative array), "lookup" in O(1).
  * Varianta naiva: Nested Loops, O(n * m). Varianta rapida: O(n + m).
  *
