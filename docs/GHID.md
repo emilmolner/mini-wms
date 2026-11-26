@@ -411,6 +411,8 @@ docker exec wms-php php bin/phpunit --testdox --filter Ex3
 
 Apoi `GET /api/comenzi/coada`: primele comenzi trebuie să aibă `"prioritate": 1` și datele cele mai vechi.
 
+În răspuns, `pePrioritati` arată câte comenzi are fiecare prioritate și pe ce locuri din coadă au ajuns. Dacă sortarea e bună, fiecare prioritate stă pe locuri una după alta (`"unaDupaAlta": true`). Ca să vezi granița dintre prioritatea 1 și 2, cere o bucată din mijlocul cozii: `GET /api/comenzi/coada?dela=983&limita=8`.
+
 **Întrebări:**
 1. Cum ai schimba regula ca firma `Bricolaj Bacău SRL` (client important) să fie mereu prima?
 2. `usort` sortează 3.000 de comenzi în câteva milisecunde. Câte comparații face, aproximativ? (Indiciu: sortările bune fac în jur de n × log₂ n comparații.)

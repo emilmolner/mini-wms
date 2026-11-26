@@ -22,6 +22,9 @@ GET {{api}}/catalog/verificare-aleatoare?numar=200
 ### Exercitiul 3 - coada de comenzi
 GET {{api}}/comenzi/coada?limita=10
 
+### Exercitiul 3 - granita dintre prioritatea 1 si 2 (locurile 983-990)
+GET {{api}}/comenzi/coada?dela=983&limita=8
+
 ### Exercitiul 4a - cautare direct in MySQL (cu sau fara index?)
 GET {{api}}/catalog/produs?cod=PROD-0791900
 

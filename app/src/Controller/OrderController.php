@@ -30,8 +30,12 @@ final class OrderController extends AbstractController
     /** EXERCITIUL 3: coada de pregatire a comenzilor, sortata dupa regulile din OrderComparator. */
     #[Route('/coada', methods: ['GET'])]
     #[OA\Parameter(name: 'limita', in: 'query', description: 'cate comenzi afisam', schema: new OA\Schema(type: 'integer', default: 15))]
-    public function queue(OrderComparator $comparator, #[MapQueryParameter(name: 'limita')] int $limit = 15): JsonResponse
-    {
+    #[OA\Parameter(name: 'dela', in: 'query', description: 'de la ce loc din coada incepem (1 = primul)', schema: new OA\Schema(type: 'integer', default: 1))]
+    public function queue(
+        OrderComparator $comparator,
+        #[MapQueryParameter(name: 'limita')] int $limit = 15,
+        #[MapQueryParameter(name: 'dela')] int $from = 1,
+    ): JsonResponse {
         // comenzile vin din baza de date in ordinea in care au fost introduse; sortarea o facem NOI, in PHP
         $orders = $this->db->fetchAllAssociative(
             "SELECT o.number AS numar, c.name AS client, o.priority AS prioritate,
@@ -48,10 +52,32 @@ final class OrderController extends AbstractController
         usort($orders, $comparator->compare(...));
         $ms = (hrtime(true) - $start) / 1e6;
 
+        // pentru fiecare prioritate: cate comenzi are si pe ce locuri din coada au ajuns (locurile incep de la 1)
+        $byPriority = [];
+        foreach ($orders as $i => $order) {
+            $p = $order['prioritate'];
+            $byPriority[$p] ??= ['prioritate' => $p, 'comenzi' => 0, 'primulLoc' => $i + 1, 'ultimulLoc' => $i + 1];
+            ++$byPriority[$p]['comenzi'];
+            $byPriority[$p]['ultimulLoc'] = $i + 1;
+        }
+        ksort($byPriority);
+        foreach ($byPriority as &$group) {
+            // daca sortarea e buna, comenzile unei prioritati stau una dupa alta, fara "gauri"
+            $group['unaDupaAlta'] = $group['ultimulLoc'] - $group['primulLoc'] + 1 === $group['comenzi'];
+        }
+        unset($group);
+
+        $from = max(1, min($from, \count($orders)));
+        $queue = [];
+        foreach (\array_slice($orders, $from - 1, max(1, min($limit, 100))) as $k => $order) {
+            $queue[] = ['loc' => $from + $k] + $order;
+        }
+
         return $this->json([
             'totalComenzi' => \count($orders),
             'timpMs' => round($ms, 3),
-            'coada' => \array_slice($orders, 0, max(1, $limit)),
+            'pePrioritati' => array_values($byPriority),
+            'coada' => $queue,
         ]);
     }
 

@@ -142,10 +142,11 @@ PROD-INEXISTENT</textarea></label>
 <div class="about">
       <p><b>Problema:</b> avem 3.000 de comenzi. In ce ordine le pregatim?</p>
       <p><b>Ideea:</b> ca la camera de garda: intai urgentele (prioritatea 1), iar intre doua comenzi la fel de urgente, cea mai veche. Nu scriem noi sortarea: ii spunem doar lui usort() care din doua comenzi vine prima (comparatorul).</p>
-      <p><b>Ce urmaresti:</b> primele randuri trebuie sa aiba prioritatea 1 (rosu) si datele cele mai vechi. Daca vezi comenzile in ordinea CMD-00001, CMD-00002..., comparatorul nu e inca scris.</p>
+      <p><b>Ce urmaresti:</b> primele randuri trebuie sa aiba prioritatea 1 (rosu) si datele cele mai vechi. Daca vezi comenzile in ordinea CMD-00001, CMD-00002..., comparatorul nu e inca scris. Rezumatul pe prioritati iti arata pe ce locuri a ajuns fiecare prioritate; scrie la "De la locul" un loc de granita (de exemplu cu 5 inainte de primul loc al prioritatii 2) ca sa vezi trecerea de la o prioritate la alta.</p>
       <p class="meta">Codul tau: <code>app/src/Algorithm/Sort/OrderComparator.php</code> · In engleza: <i>Sorting cu un Comparator, O(n log n)</i></p>
     </div>
     <form data-action="coada">
+      <label>De la locul <input name="dela" type="number" value="1" min="1" max="3000"></label>
       <label>Cate comenzi <input name="limita" type="number" value="15" min="1" max="100"></label>
       <button>Afiseaza</button>
     </form>
@@ -406,10 +407,17 @@ const handlers = {
   },
 
   async coada(form) {
-    const d = await api('/comenzi/coada', { limita: form.limita.value });
-    const rows = d.coada.map((c, i) => `<tr><td>${i + 1}</td><td>${esc(c.numar)}</td><td>${esc(c.client)}</td><td><span class="prio p${c.prioritate}">${c.prioritate}</span></td><td>${esc(c.dataCreare)}</td></tr>`);
-    return `<div class="cards">${stat('Comenzi sortate', d.totalComenzi, d.timpMs + ' ms')}</div>
-      <table><tr><th>#</th><th>Numar</th><th>Client</th><th>Prioritate</th><th>Data</th></tr>${rows.join('')}</table>`;
+    const d = await api('/comenzi/coada', { limita: form.limita.value, dela: form.dela.value });
+    const nr = v => v.toLocaleString('ro-RO');
+    const groups = d.pePrioritati.map(g => stat('Prioritatea ' + g.prioritate, nr(g.comenzi) + ' comenzi',
+      g.unaDupaAlta ? `locurile ${nr(g.primulLoc)} - ${nr(g.ultimulLoc)}` : `amestecate intre locurile ${nr(g.primulLoc)} si ${nr(g.ultimulLoc)}`));
+    const rows = d.coada.map(c => `<tr><td>${c.loc}</td><td>${esc(c.numar)}</td><td>${esc(c.client)}</td><td><span class="prio p${c.prioritate}">${c.prioritate}</span></td><td>${esc(c.dataCreare)}</td></tr>`);
+    return `<div class="cards">${stat('Comenzi sortate', nr(d.totalComenzi), d.timpMs + ' ms')}${groups.join('')}</div>
+      ${explain([
+        ['Prioritatea 1 / 2 / 3', 'cate comenzi are fiecare prioritate si pe ce locuri din coada au ajuns dupa sortare. Daca sortarea e buna, fiecare prioritate ocupa locuri una dupa alta (1 - 986, apoi 987 - ...). Daca scrie "amestecate", comparatorul nu pune inca urgentele in fata.'],
+        ['Loc', 'pozitia comenzii in coada sortata. Schimba "De la locul" ca sa vezi alta bucata din coada.'],
+      ])}
+      <table><tr><th>Loc</th><th>Numar</th><th>Client</th><th>Prioritate</th><th>Data</th></tr>${rows.join('')}</table>`;
   },
 
   async produs(form) {
