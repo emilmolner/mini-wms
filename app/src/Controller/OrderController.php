@@ -106,15 +106,29 @@ final class OrderController extends AbstractController
     #[OA\Parameter(name: 'capacitate', in: 'query', description: 'cate kg suporta o cutie', schema: new OA\Schema(type: 'integer', default: 30))]
     public function packing(string $numar, BoxPacker $packer, #[MapQueryParameter(name: 'capacitate')] int $capacity = 30): JsonResponse
     {
+        $lines = $this->orderLines($numar);
+
         // fiecare bucata separat: 2 bucati x 7 kg => [7, 7]
         $weights = [];
-        foreach ($this->orderLines($numar) as $line) {
+        foreach ($lines as $line) {
+            if ($line['weight_kg'] > $capacity) {
+                throw new \InvalidArgumentException(\sprintf(
+                    'Produsul %s (%s) are %d kg pe bucata si nu incape intr-o cutie de %d kg. Mareste capacitatea cutiei.',
+                    $line['code'], $line['name'], $line['weight_kg'], $capacity,
+                ));
+            }
             for ($k = 0; $k < $line['quantity']; ++$k) {
                 $weights[] = (int) $line['weight_kg'];
             }
         }
 
-        $result = ['comanda' => $numar, 'capacitateCutie' => $capacity, 'bucati' => $weights, 'totalKg' => array_sum($weights)];
+        $result = [
+            'comanda' => $numar,
+            'detaliiComanda' => $this->orderDetails($numar, $lines),
+            'capacitateCutie' => $capacity,
+            'bucati' => $weights,
+            'totalKg' => array_sum($weights),
+        ];
         $methods = [
             'cutiaCurenta' => 'nextFit',
             'primaCutieInCareIncape' => 'firstFit',
@@ -136,7 +150,8 @@ final class OrderController extends AbstractController
         $map = new WarehouseMap();
         $codes = ['START'];
         $positions = [$map->start()];
-        foreach ($this->orderLines($numar) as $line) {
+        $lines = $this->orderLines($numar);
+        foreach ($lines as $line) {
             if (!\in_array($line['location'], $codes, true)) {
                 $codes[] = $line['location'];
                 $positions[] = [(int) $line['map_row'], (int) $line['map_col']];
@@ -167,6 +182,7 @@ final class OrderController extends AbstractController
 
         return $this->json([
             'comanda' => $numar,
+            'detaliiComanda' => $this->orderDetails($numar, $lines),
             'locatii' => $codes,
             'distante' => $dist,
             'celMaiApropiatVecin' => [
@@ -186,11 +202,11 @@ final class OrderController extends AbstractController
         ]);
     }
 
-    /** @return list<array{weight_kg: int, quantity: int, location: string, map_row: int, map_col: int}> */
+    /** @return list<array{code: string, name: string, weight_kg: int, quantity: int, location: string, map_row: int, map_col: int}> */
     private function orderLines(string $number): array
     {
         $lines = $this->db->fetchAllAssociative(
-            'SELECT p.weight_kg, ol.quantity, l.code AS location, l.map_row, l.map_col
+            'SELECT p.code, p.name, p.weight_kg, ol.quantity, l.code AS location, l.map_row, l.map_col
              FROM orders o
              JOIN order_line ol ON ol.order_id = o.id
              JOIN product p ON p.id = ol.product_id
@@ -204,5 +220,34 @@ final class OrderController extends AbstractController
         }
 
         return $lines;
+    }
+
+    /**
+     * Datele comenzii pentru afisare: clientul, prioritatea, data si produsele (cu cantitate si greutate).
+     *
+     * @param list<array{code: string, name: string, weight_kg: int, quantity: int, location: string}> $lines
+     */
+    private function orderDetails(string $number, array $lines): array
+    {
+        $order = $this->db->fetchAssociative(
+            "SELECT customer AS client, priority AS prioritate, DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') AS dataCreare
+             FROM orders WHERE number = :number",
+            ['number' => strtoupper($number)],
+        );
+
+        return [
+            'numar' => strtoupper($number),
+            'client' => $order['client'],
+            'prioritate' => (int) $order['prioritate'],
+            'dataCreare' => $order['dataCreare'],
+            'produse' => array_map(fn (array $line) => [
+                'cod' => $line['code'],
+                'denumire' => $line['name'],
+                'cantitate' => (int) $line['quantity'],
+                'kgPeBucata' => (int) $line['weight_kg'],
+                'totalKg' => (int) $line['quantity'] * (int) $line['weight_kg'],
+                'locatie' => $line['location'],
+            ], $lines),
+        ];
     }
 }

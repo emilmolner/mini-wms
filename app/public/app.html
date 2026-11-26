@@ -281,6 +281,20 @@ function stat(title, value, note = '') {
   return `<div class="stat"><small>${esc(title)}</small><b>${esc(value)}</b><small>${esc(note)}</small></div>`;
 }
 
+// Fisa comenzii: clientul, prioritatea, data si tabelul cu produsele (cantitate, greutate, locatie)
+function orderCard(o) {
+  const totalPieces = o.produse.reduce((sum, p) => sum + p.cantitate, 0);
+  const totalKg = o.produse.reduce((sum, p) => sum + p.totalKg, 0);
+  return `<h3>Comanda ${esc(o.numar)}</h3>
+    <p>Client: <b>${esc(o.client)}</b> · Prioritate: <span class="prio p${o.prioritate}">${o.prioritate}</span> · Data: ${esc(o.dataCreare)}</p>
+    <table>
+      <tr><th>Cod</th><th>Produs</th><th>Cantitate</th><th>Kg / bucata</th><th>Total kg</th><th>Locatie</th></tr>
+      ${o.produse.map(p => `<tr><td>${esc(p.cod)}</td><td>${esc(p.denumire)}</td><td>${p.cantitate}</td>
+        <td>${p.kgPeBucata}</td><td>${p.totalKg}</td><td>${esc(p.locatie)}</td></tr>`).join('')}
+      <tr><th colspan="2">Total</th><th>${totalPieces} bucati</th><th></th><th>${totalKg} kg</th><th></th></tr>
+    </table>`;
+}
+
 // ---------- harta depozitului ----------
 // Codul unei celule: litera coloanei + randul pe doua cifre (coloana 22, randul 8 => "W08").
 function cellCode(row, col) {
@@ -469,7 +483,10 @@ const handlers = {
     ];
     const warning = d.primaCutieInCareIncape.numarCutii === 0
       ? '<p class="error">"Prima cutie in care incape" nu a pus nimic in cutii. Ai rezolvat Exercitiul 5 (BoxPacker.php)?</p>' : '';
-    return `${warning}<div class="cards">${stat('Bucati', d.bucati.length, d.bucati.join(', ') + ' kg')}${stat('Total', d.totalKg + ' kg')}</div>
+    return `${orderCard(d.detaliiComanda)}
+      <h3>Bucatile de impachetat</h3>
+      <p class="hint">Fiecare bucata se pune separat: 2 bucati x 12 kg devin doua bucati de 12 kg.</p>
+      ${warning}<div class="cards">${stat('Bucati', d.bucati.length, d.bucati.join(', ') + ' kg')}${stat('Total', d.totalKg + ' kg')}</div>
       ${rules.map(([key, title]) => `<h3>${title}: ${d[key].numarCutii} cutii</h3>${drawBoxes(d[key].cutii)}`).join('')}`;
   },
 
@@ -489,7 +506,9 @@ const handlers = {
   async ruta(form) {
     const d = await api('/comenzi/' + encodeURIComponent(form.numar.value) + '/ruta', {});
     const routes = { nn: d.celMaiApropiatVecin, best: d.toateVariantele };
-    const html = `<div class="cards">
+    const html = `${orderCard(d.detaliiComanda)}
+      <p class="hint">Locatiile distincte de mai sus sunt opririle rutei. Mai multe produse pe aceeasi locatie = o singura oprire.</p>
+      <div class="cards">
         ${stat('Cel mai apropiat vecin', routes.nn.pasi + ' pasi', routes.nn.timpMs + ' ms')}
         ${stat('Toate variantele (optim)', routes.best.pasi + ' pasi', routes.best.timpMs + ' ms')}
         ${stat('Rute verificate', routes.best.ruteVerificate.toLocaleString('ro-RO'))}
