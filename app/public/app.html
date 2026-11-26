@@ -59,6 +59,10 @@
   .box div { background:#f59e0b; border-top:1px solid #fffbeb; color:#451a03; font-size:11px;
              display:flex; align-items:center; justify-content:center; overflow:hidden; }
   pre.plan { white-space:pre-wrap; max-height:none; }
+  h4 { margin:16px 0 4px; font-size:14px; }
+  table.explain td, table.explain th { font-family:Menlo, Consolas, monospace; font-size:12px; }
+  table.explain tr.bad td { background:#fee2e2; } table.explain tr.good td { background:#dcfce7; }
+  pre.plan .bad { color:#fca5a5; font-weight:bold; } pre.plan .good { color:#86efac; font-weight:bold; }
   .prio { display:inline-block; min-width:22px; text-align:center; border-radius:6px; padding:1px 6px; font-weight:600; }
   .prio.p1 { background:#fee2e2; color:#b91c1c; } .prio.p2 { background:#fef3c7; color:#92400e; } .prio.p3 { background:#f1f5f9; color:#64748b; }
   .error { color:var(--bad); font-weight:600; }
@@ -360,12 +364,47 @@ const handlers = {
   async produs(form) {
     const d = await api('/catalog/produs', { cod: form.cod.value });
     const p = d.produs;
+    const plan = d.cumACautatMySQL.join('\n');
+
+    // Din planul MySQL ne intereseaza un singur lucru: cate randuri din tabela product a citit.
+    // "Table scan on p ... rows=200000"  => a citit tot tabelul
+    // "Index lookup on p using idx_product_code ... rows=1"  => a sarit direct la produs prin index
+    const scan = plan.match(/Table scan on p .*?actual time=[\d.]+\.\.([\d.]+) rows=([\d.]+)/);
+    const index = plan.match(/Index lookup on p using (\w+).*?actual time=[\d.]+\.\.([\d.]+) rows=([\d.]+)/);
+    const rows = n => Math.round(parseFloat(n)).toLocaleString('ro-RO');
+
+    let explanation = 'Nu am putut citi planul.';
+    if (scan) {
+      explanation = `MySQL a citit <b>tot tabelul product: ${rows(scan[2])} de randuri</b>, unul cate unul, ca sa gaseasca un singur produs.
+        Exact ca o cautare pe rand (Exercitiul 1). Adauga indexul din Exercitiul 4a si cauta din nou.`;
+    } else if (index) {
+      explanation = `MySQL a folosit indexul <code>${esc(index[1])}</code> si a sarit direct la produs: <b>${rows(index[3])} rand citit</b>.
+        Ca atunci cand cauti un capitol in cuprinsul unei carti, in loc sa citesti toata cartea.`;
+    }
+
     return `<div class="cards">
       ${stat('Produs', p ? p.denumire : 'nu exista', p ? p.cod + ', locatia ' + p.locatie : '')}
       ${stat('Foloseste index?', d.folosesteIndex ? 'DA' : 'NU', d.folosesteIndex ? 'Index lookup' : 'Table scan: citeste tot tabelul')}
-      ${stat('Timp', d.timpMs + ' ms')}
+      ${stat('Randuri citite', scan ? rows(scan[2]) : index ? rows(index[3]) : '-', d.timpMs + ' ms')}
     </div>
-    <pre class="plan">${esc(d.cumACautatMySQL.join('\n'))}</pre>`;
+    <p>${explanation}</p>
+
+    <h4>EXPLAIN (tabelul clasic, ca in DBeaver / MySQL Workbench)</h4>
+    <p class="hint">Uita-te la coloanele <b>key</b> (ce index a folosit; gol = niciunul) si <b>rows</b> (cate randuri estimeaza ca citeste).
+      La <b>type</b>: ALL = tot tabelul, ref / eq_ref / const = prin index.
+      (<code>IDX_D34A...</code> e indexul pe <code>location_id</code>, creat automat de Doctrine pentru legatura cu tabela location; nu ajuta la cautarea dupa cod.)</p>
+    <table class="explain">
+      <tr>${['table', 'type', 'possible_keys', 'key', 'rows', 'Extra'].map(c => `<th>${c}</th>`).join('')}</tr>
+      ${d.explain.map(r => `<tr class="${r.table === 'p' ? (r.key ? 'good' : 'bad') : ''}">
+        ${['table', 'type', 'possible_keys', 'key', 'rows', 'Extra'].map(c => `<td>${esc(r[c] ?? 'NULL')}</td>`).join('')}</tr>`).join('')}
+    </table>
+
+    <h4>EXPLAIN ANALYZE (planul ca arbore, cu timpii reali)</h4>
+    <p class="hint">Se citeste de jos in sus si din interior spre exterior. Rosu = a citit tot tabelul, verde = a folosit un index.</p>
+    <pre class="plan">${d.cumACautatMySQL.map(line => {
+      const css = /Table scan/.test(line) ? 'bad' : /Index lookup|index lookup/.test(line) ? 'good' : '';
+      return `<span class="${css}">${esc(line)}</span>`;
+    }).join('\n')}</pre>`;
   },
 
   async raport(form) {

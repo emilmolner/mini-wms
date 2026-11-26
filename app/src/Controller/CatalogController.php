@@ -106,11 +106,15 @@ final class CatalogController extends AbstractController
 
         $plan = array_values(array_filter(explode("\n", (string) $db->fetchOne('EXPLAIN ANALYZE '.$sql, $params))));
 
+        // EXPLAIN clasic (tabel): coloana "key" arata indexul folosit, coloana "rows" cate randuri estimeaza ca citeste
+        $explain = $db->fetchAllAssociative('EXPLAIN '.$sql, $params);
+
         return $this->json([
             'produs' => $product ?: null,
             'timpMs' => round($ms, 3),
             'folosesteIndex' => !preg_grep('/Table scan on p/', $plan),
             'cumACautatMySQL' => $plan,
+            'explain' => $explain,
         ]);
     }
 
