@@ -112,12 +112,27 @@ Deschide folderul în VS Code (*File → Open Folder*). VS Code îți propune c�
 docker compose up -d --build
 ```
 
-Prima dată durează câteva minute. Se pornesc două „calculatoare mici” (containere):
+Prima dată durează câteva minute. **Această singură comandă pornește tot proiectul**, adică ambele containere de mai jos. Nu trebuie pornite separat:
+
+- Docker citește fișierul `compose.yaml`, unde sunt descrise containerele;
+- `--build` construiește imaginea PHP (PHP 8.5, extensiile, Composer), după rețeta din `docker/php/Dockerfile`;
+- pornește întâi MySQL, **așteaptă să fie gata**, apoi pornește aplicația PHP;
+- `-d` (*detached*) le lasă să ruleze în fundal, iar terminalul rămâne liber.
+
+Se pornesc două „calculatoare mici” (containere):
 
 | Container | Ce face | Adresa |
 |---|---|---|
 | `wms-php` | aplicația noastră (PHP + Symfony) | http://localhost:8000 |
 | `wms-mysql` | baza de date MySQL | `localhost:3307` (utilizator `wms`, parolă `wms`) |
+
+Verifică dacă au pornit amândouă:
+
+```bash
+docker compose ps
+```
+
+Amândouă trebuie să fie *running*, iar la `wms-mysql` trebuie să scrie și *healthy*.
 
 **Pasul 3. Instalează bibliotecile PHP, creează tabelele și generează datele:**
 
@@ -139,7 +154,7 @@ Comenzi: 3000
 
 **Pasul 4. Verifică.** Deschide în browser **http://localhost:8000/api/doc**. Vezi pagina cu toate rutele API-ului, grupate pe exerciții. Deschide `GET /api/depozit/harta`, apasă **Try it out**, apoi **Execute**. Trebuie să vezi harta depozitului.
 
-**La începutul fiecărei întâlniri** e suficient să pornești Docker Desktop și să rulezi `docker compose up -d`. **La sfârșit:** `docker compose stop`.
+**La începutul fiecărei întâlniri** e suficient să pornești Docker Desktop și să rulezi `docker compose up -d` (fără `--build`: imaginea e deja construită). **La sfârșit:** `docker compose stop`. `--build` e nevoie din nou doar dacă se schimbă ceva în folderul `docker/`.
 
 ### 0.3 Turul proiectului
 
@@ -818,6 +833,8 @@ Ultima comandă îți arată, fișier cu fișier, diferența dintre ce aveai de 
 | Pagina dă eroare 500 imediat după pornire | Nu ai rulat `composer install`, sau MySQL încă pornește. Mai așteaptă 30 de secunde. |
 | `Table 'wms.product' doesn't exist` | Nu ai rulat migrările (`doctrine:migrations:migrate -n`). |
 | Testele merg, dar Swagger arată date vechi | Reîncarcă pagina cu Ctrl+F5. |
+| Am salvat fișierul, dar răspunsul e tot cel vechi | PHP ține minte codul compilat 2 secunde. Mai trimite o dată cererea. |
+| Nu știu ce eroare e | `docker compose logs wms-php` arată ultimele mesaje ale aplicației. |
 | Am stricat ceva într-un fișier | `git checkout -- app/src/Algorithm/Search/BinarySearch.php` îl aduce înapoi la ultima versiune salvată. |
 | Vreau să o iau de la capăt cu datele | `docker exec wms-php php bin/console app:date:genereaza` |
 | Vreau să șterg tot (containere și date) | `docker compose down -v`, apoi pașii din 0.2 |
@@ -827,9 +844,19 @@ Ultima comandă îți arată, fișier cu fișier, diferența dintre ce aveai de 
 ## B. Comenzi utile
 
 ```bash
-# pornire / oprire
-docker compose up -d
-docker compose stop
+# pornire / oprire (ambele containere deodata)
+docker compose up -d --build   # prima data, sau dupa o schimbare in folderul docker/
+docker compose up -d           # in rest
+docker compose stop            # oprire; datele raman
+
+# ce se intampla in containere
+docker compose ps                # ce ruleaza
+docker compose logs -f wms-php   # mesajele aplicatiei (iesi cu Ctrl+C)
+docker compose restart wms-php   # reporneste doar aplicatia
+
+# stergere
+docker compose down              # sterge containerele; datele MySQL raman
+docker compose down -v           # sterge si datele; apoi pasii din 0.2
 
 # testele (toate, sau doar ale unui exercițiu)
 docker exec wms-php php bin/phpunit --testdox

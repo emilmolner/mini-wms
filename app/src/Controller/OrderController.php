@@ -91,6 +91,9 @@ final class OrderController extends AbstractController
         #[MapQueryParameter(name: 'client')] int $customerId = 1,
         #[MapQueryParameter(name: 'metoda')] string $method = 'naiva',
     ): JsonResponse {
+        if (!\in_array($method, ['naiva', 'join'], true)) {
+            throw new \InvalidArgumentException('metoda trebuie sa fie "naiva" sau "join".');
+        }
         $customerName = $this->db->fetchOne('SELECT name FROM customer WHERE id = :id', ['id' => $customerId]);
         if (false === $customerName) {
             throw new NotFoundHttpException("Clientul cu id-ul $customerId nu exista. Lista clientilor: GET /api/clienti");

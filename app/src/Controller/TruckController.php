@@ -56,6 +56,9 @@ final class TruckController extends AbstractController
         #[MapQueryParameter(name: 'capacitate')] int $capacity = 800,
         #[MapQueryParameter(name: 'comenzi')] int $orders = 15,
     ): JsonResponse {
+        if ($capacity < 1 || $capacity > 100000) {
+            throw new \InvalidArgumentException('capacitate trebuie sa fie intre 1 si 100000 kg.');
+        }
         $items = $db->fetchAllAssociative(
             'SELECT o.number AS nume, CAST(SUM(ol.quantity * p.weight_kg) AS SIGNED) AS greutate, CAST(SUM(ol.quantity * p.price) AS SIGNED) AS valoare
              FROM orders o
