@@ -49,6 +49,10 @@
   .toggle { display:flex; gap:6px; flex-wrap:wrap; margin:4px 0 8px; }
   .toggle button { border:1px solid #d1d5db; background:#fff; padding:7px 12px; border-radius:8px; cursor:pointer; font-size:14px; }
   .toggle button.active { background:var(--path); border-color:var(--path); font-weight:600; }
+  .about { background:#eff6ff; border-left:4px solid var(--accent); border-radius:8px; padding:10px 14px; margin:8px 0 16px; font-size:14px; line-height:1.5; }
+  .about p { margin:3px 0; }
+  .about .meta { color:var(--muted); font-size:13px; margin-top:6px; }
+  .about code { background:#dbeafe; padding:1px 5px; border-radius:4px; font-size:12px; }
   .boxes { display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; margin:6px 0 16px; }
   .box { width:46px; height:120px; border:2px solid #92400e; border-top-style:dashed; border-radius:0 0 6px 6px;
          display:flex; flex-direction:column-reverse; background:#fffbeb; }
@@ -82,7 +86,12 @@
 <main>
   <section id="cautare" class="active">
     <h2>Cautare produs dupa cod (Exercitiul 1)</h2>
-    <p class="hint">Compara numarul de comparatii: cautare pe rand vs. cautare binara, in 200.000 de coduri.</p>
+<div class="about">
+      <p><b>Problema:</b> un client suna: "Aveti produsul PROD-0791900?". Il cautam printre 200.000 de coduri.</p>
+      <p><b>Ideea:</b> jocul "ghiceste numarul": lista e sortata, deci ne uitam la mijloc si aruncam jumatatea in care sigur nu e. La fiecare pas raman de doua ori mai putine coduri.</p>
+      <p><b>Ce urmaresti:</b> numarul de comparatii. Pe rand: zeci de mii. Binar: in jur de 18. Incearca si un cod care nu exista.</p>
+      <p class="meta">Codul tau: <code>app/src/Algorithm/Search/BinarySearch.php</code> · In engleza: <i>Binary Search, O(log n)</i></p>
+    </div>
     <form data-action="cautare">
       <label>Cod produs <input name="cod" value="PROD-0791900"></label>
       <button>Cauta</button>
@@ -92,7 +101,12 @@
 
   <section id="verificare">
     <h2>Ce coduri nu exista in catalog? (Exercitiul 2)</h2>
-    <p class="hint">Varianta naiva (doua bucle) vs. "dulapul cu sertare" (tabela de dispersie).</p>
+<div class="about">
+      <p><b>Problema:</b> un client trimite o lista de coduri. Care dintre ele NU exista in catalog?</p>
+      <p><b>Ideea:</b> in loc sa cautam fiecare cod prin tot catalogul (doua bucle una in alta), punem intai catalogul intr-un "dulap cu sertare etichetate" (un array cu chei). Apoi deschidem direct sertarul cu eticheta codului.</p>
+      <p><b>Ce urmaresti:</b> operatiile. Cu 3 coduri, varianta naiva poate fi chiar mai rapida. Cu 200 de coduri, ea face peste 30 de milioane de operatii, iar dulapul doar 200.000.</p>
+      <p class="meta">Codul tau: <code>app/src/Algorithm/Hash/MissingCodeFinder.php</code> · In engleza: <i>Hash Table, O(n + m) fata de Nested Loops, O(n &middot; m)</i></p>
+    </div>
     <div>
       <form data-action="verificare">
         <label>Coduri, cate unul pe rand
@@ -114,7 +128,12 @@ PROD-INEXISTENT</textarea></label>
 
   <section id="coada">
     <h2>Coada de pregatire (Exercitiul 3)</h2>
-    <p class="hint">Ordinea in care se pregatesc comenzile: prioritate, apoi vechime, apoi numar.</p>
+<div class="about">
+      <p><b>Problema:</b> avem 3.000 de comenzi. In ce ordine le pregatim?</p>
+      <p><b>Ideea:</b> ca la camera de garda: intai urgentele (prioritatea 1), iar intre doua comenzi la fel de urgente, cea mai veche. Nu scriem noi sortarea: ii spunem doar lui usort() care din doua comenzi vine prima (comparatorul).</p>
+      <p><b>Ce urmaresti:</b> primele randuri trebuie sa aiba prioritatea 1 (rosu) si datele cele mai vechi. Daca vezi comenzile in ordinea CMD-00001, CMD-00002..., comparatorul nu e inca scris.</p>
+      <p class="meta">Codul tau: <code>app/src/Algorithm/Sort/OrderComparator.php</code> · In engleza: <i>Sorting cu un Comparator, O(n log n)</i></p>
+    </div>
     <form data-action="coada">
       <label>Cate comenzi <input name="limita" type="number" value="15" min="1" max="100"></label>
       <button>Afiseaza</button>
@@ -124,9 +143,15 @@ PROD-INEXISTENT</textarea></label>
 
   <section id="bazadedate">
     <h2>Baza de date: index si problema N+1 (Exercitiul 4)</h2>
+    <div class="about">
+      <p><b>Problema:</b> cautarea unui produs si raportul unui client merg greu direct in baza de date.</p>
+      <p><b>Ideea:</b> si MySQL foloseste algoritmi. Un index e ca un cuprins sortat (4a). Problema N+1 e ca un drum la magazin pentru fiecare lucru, in loc de o singura lista (4b).</p>
+      <p><b>Ce urmaresti:</b> la 4a, daca MySQL foloseste indexul; la 4b, cate query-uri SQL se trimit.</p>
+      <p class="meta">Codul tau: <code>app/src/Entity/Product.php (4a), app/src/Repository/OrderRepository.php (4b)</code> · In engleza: <i>Database Index (B-Tree), N+1 Query Problem</i></p>
+    </div>
     <div>
       <h3>4a. Cauta un produs direct in MySQL</h3>
-      <p class="hint">Fara index: "Table scan" (MySQL citeste tot tabelul). Cu index: "Index lookup".</p>
+      <p class="hint">Fara index: "Table scan" (MySQL citeste tot tabelul). Cu index: "Index lookup", iar timpul scade de zeci de ori.</p>
       <form data-action="produs">
         <label>Cod produs <input name="cod" value="PROD-0791900"></label>
         <button>Cauta in MySQL</button>
@@ -135,7 +160,7 @@ PROD-INEXISTENT</textarea></label>
     </div>
     <div>
       <h3>4b. Raportul unui client: cate query-uri SQL?</h3>
-      <p class="hint">Comparam varianta naiva cu varianta cu JOIN.</p>
+      <p class="hint">Varianta naiva trimite un query pentru comenzi, apoi cate unul pentru fiecare comanda si fiecare produs. Cu JOIN: unul singur.</p>
       <form data-action="raport">
         <label>Client
           <select name="client">
@@ -151,7 +176,12 @@ PROD-INEXISTENT</textarea></label>
 
   <section id="cutii">
     <h2>In cate cutii incape comanda? (Exercitiul 5)</h2>
-    <p class="hint">Trei reguli lacome. Fiecare dreptunghi este o cutie; inaltimea arata cate kg are in ea. Exemplu bun: CMD-00587.</p>
+<div class="about">
+      <p><b>Problema:</b> o cutie duce cel mult 30 kg. In cate cutii impachetam bucatile unei comenzi?</p>
+      <p><b>Ideea:</b> trei reguli "lacome" (la fiecare pas alegi ce pare mai bun acum): o singura cutie deschisa; prima cutie in care incape; intai bucatile grele, ca la facut bagajul.</p>
+      <p><b>Ce urmaresti:</b> fiecare dreptunghi e o cutie, iar inaltimea portocalie arata cate kg are. Cu cat regula e mai buna, cu atat cutiile sunt mai pline si sunt mai putine (la CMD-00587: 9, 8, 7).</p>
+      <p class="meta">Codul tau: <code>app/src/Algorithm/Packing/BoxPacker.php</code> · In engleza: <i>Bin Packing: Next Fit, First Fit, First Fit Decreasing</i></p>
+    </div>
     <form data-action="cutii">
       <label>Comanda <input name="numar" value="CMD-00587"></label>
       <label>Capacitate cutie (kg) <input name="capacitate" type="number" value="30" min="1"></label>
@@ -162,7 +192,12 @@ PROD-INEXISTENT</textarea></label>
 
   <section id="camion">
     <h2>Ce incarcam in camion? (Exercitiul 6)</h2>
-    <p class="hint">Metoda lacoma vs. toate combinatiile, pe primele comenzi din coada (maximum 20).</p>
+<div class="about">
+      <p><b>Problema:</b> camionul duce 800 kg. Ce comenzi din coada de azi incarcam, ca sa plece marfa de valoare cat mai mare?</p>
+      <p><b>Ideea:</b> metoda lacoma ia intai comenzile care aduc cei mai multi lei pe kilogram. "Toate combinatiile" incearca, pentru fiecare comanda, "o iau" si "nu o iau" si pastreaza cea mai buna varianta.</p>
+      <p><b>Ce urmaresti:</b> diferenta de lei dintre cele doua metode si numarul de variante verificate. Creste numarul de comenzi spre 20 si uita-te cum creste timpul.</p>
+      <p class="meta">Codul tau: <code>app/src/Algorithm/Optimization/TruckLoader.php</code> · In engleza: <i>0/1 Knapsack: Greedy fata de Brute Force, O(2^n)</i></p>
+    </div>
     <form data-action="camion">
       <label>Capacitate (kg) <input name="capacitate" type="number" value="800"></label>
       <label>Comenzi luate in calcul <input name="comenzi" type="number" value="15" max="20"></label>
@@ -173,7 +208,12 @@ PROD-INEXISTENT</textarea></label>
 
   <section id="drum">
     <h2>Drumul cel mai scurt (Exercitiul 7)</h2>
-    <p class="hint">Codul unei locatii = litera coloanei + numarul randului (W08 = coloana W, randul 08). Tine mouse-ul pe o celula ca sa-i vezi codul.</p>
+<div class="about">
+      <p><b>Problema:</b> omul care strange produsele pleaca de la rampa (S). Pe unde merge ca sa ajunga la un raft in cei mai putini pasi, ocolind paletul (P)?</p>
+      <p><b>Ideea:</b> ca valurile dintr-o piatra aruncata in apa: intai celulele aflate la 1 pas, apoi cele la 2 pasi, si tot asa. Primul "val" care atinge destinatia ne da drumul cel mai scurt.</p>
+      <p><b>Ce urmaresti:</b> drumul galben si numarul de pasi. Codul unei locatii = litera coloanei + randul (W08 = coloana W, randul 08); tine mouse-ul pe o celula ca sa-i vezi codul.</p>
+      <p class="meta">Codul tau: <code>app/src/Algorithm/Graph/PathFinder.php</code> · In engleza: <i>Shortest Path cu Breadth-First Search (BFS)</i></p>
+    </div>
     <form data-action="drum">
       <label>De la <input name="de_la" value="START"></label>
       <label>Spre <input name="spre" value="W08"></label>
@@ -184,7 +224,12 @@ PROD-INEXISTENT</textarea></label>
 
   <section id="ruta">
     <h2>Ruta de colectare a unei comenzi (Exercitiul 8)</h2>
-    <p class="hint">Cel mai apropiat vecin (rapid) vs. toate variantele (exact). Cifrele de pe harta arata ordinea opririlor. Exemplu interesant: CMD-00017.</p>
+<div class="about">
+      <p><b>Problema:</b> o comanda are produse pe mai multe rafturi. In ce ordine le luam, ca sa facem cat mai putini pasi (dus si intors la rampa)?</p>
+      <p><b>Ideea:</b> metoda lacoma: mergi mereu la cel mai apropiat raft la care n-ai fost. "Toate variantele" incearca toate ordinile posibile (720 pentru 6 rafturi).</p>
+      <p><b>Ce urmaresti:</b> cifrele de pe harta arata ordinea opririlor. Comuta intre cele doua metode: la CMD-00017, metoda lacoma face 70 de pasi, iar cea mai buna ruta 64.</p>
+      <p class="meta">Codul tau: <code>app/src/Algorithm/Graph/PickingRoute.php</code> · In engleza: <i>Travelling Salesman Problem: Nearest Neighbor fata de Brute Force, O(n!)</i></p>
+    </div>
     <form data-action="ruta">
       <label>Comanda <input name="numar" value="CMD-00017"></label>
       <button>Calculeaza</button>
