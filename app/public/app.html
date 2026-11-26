@@ -164,7 +164,8 @@ const handlers = {
 
   async drum(form) {
     const d = await api('/depozit/drum', { de_la: form.de_la.value, spre: form.spre.value });
-    return `<div class="cards">
+    const warning = d.gasit ? '' : '<p class="error">Nu s-a gasit niciun drum. Ai rezolvat Exercitiul 7 (PathFinder.php)?</p>';
+    return `${warning}<div class="cards">
       ${stat('Pasi', d.pasi ?? '-')}
       ${stat('Celule verificate', d.celuleVerificate)}
     </div>${drawMap(d.harta)}`;
